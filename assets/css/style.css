@@ -11,6 +11,7 @@
 body {
   font-family: "Open Sans", sans-serif;
   color: #272829;
+  background: #000;
 }
 
 a {
@@ -81,8 +82,8 @@ ul {
 #header .profile img {
   margin: 25px auto;
   display: block;
-  width: 270px;
-  height: 270px;
+  width: 170px;
+  height: 170px;
 }
 
 .rounded-circle {
@@ -278,9 +279,13 @@ ul {
 
 .contacto {
   border-bottom: 1px solid #ffffff47;
-  margin-bottom: 6%;
+  margin-bottom: 3%;
 }
-
+.copyleft{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 .contacto strong,
 span {
   color: #ffffff;
@@ -297,7 +302,30 @@ span {
 .floating-wpp .floating-wpp-button {
   width: 46px !important;
   height: 46px !important;
-  margin-bottom: 10px !important;
+  margin-bottom: 30px !important;
+}
+.firma{
+  border-radius: 0% !important;
+  width: 150px;
+  height: 100px;
+  transform: rotate(-6deg);
+  -ms-transform: rotate(-6deg);
+  -webkit-transform: rotate(-6deg);
+  display: flex;
+  flex-direction: row;
+  width: -webkit-fill-available;
+  justify-content: center;
+  margin-bottom: -30px;
+
+}
+.firma-img{
+  width: 150px;
+  height: 80px;
+}
+.email {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 @media (max-width: 1199px) {
@@ -319,12 +347,10 @@ span {
     display: flex;
     align-items: center;
     flex-direction: column;
-    width: -webkit-fill-available;
-    margin-right: 15px;
+    width: 270px;
   }
 
   .contacto {
-    padding-bottom: 10%;
     border-bottom: 1px solid #ffffff47;
     margin-bottom: 6%;
     display: flex;
@@ -332,9 +358,13 @@ span {
     align-items: center;
   }
 
+  .creditos{
+    font-size: 10px;
+  }
+
   .floating-wpp .floating-wpp-button {
-    width: 46px !important;
-    height: 46px !important;
+    width: 40px !important;
+    height: 40px !important;
   }
 }
 
@@ -1262,10 +1292,6 @@ ul li::marker {
 }
 
 @media (max-height: 600px) {
-  .contacto {
-    display: none;
-  }
-
   #header .profile h1 {
     margin-top: 35px;
   }
@@ -1274,6 +1300,7 @@ ul li::marker {
 @media (min-height: 601px) {
   .contacto {
     display: flex;
+    flex-direction: column;
   }
 
   #header .profile h1 {
