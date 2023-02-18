@@ -162,6 +162,7 @@ ul {
   .contenedor {
     margin-left: 0px;
     margin-top: 90px;
+    margin-right: 0px;
   }
 }
 
@@ -1271,7 +1272,7 @@ ul li::marker {
 
 @media (min-height: 601px) {
   .contacto {
-    display: block;
+    display: flex;
   }
 
   #header .profile h1 {
