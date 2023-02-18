@@ -11,15 +11,16 @@
 body {
   font-family: "Open Sans", sans-serif;
   color: #272829;
+  background: #000;
 }
 
 a {
-  color: #1c3b4f;
+  color: #ffffff;
   text-decoration: none;
 }
 
 a:hover {
-  color: #37b3ed;
+  color: #24d366;
   text-decoration: none;
 }
 
@@ -81,8 +82,9 @@ ul {
 #header .profile img {
   margin: 25px auto;
   display: block;
-  width: 270px;
-  height: 270px;
+  width: 170px;
+  height: 170px;
+  margin-bottom: 15px;
 }
 
 .rounded-circle {
@@ -111,11 +113,12 @@ ul {
   align-content: center;
   justify-content: space-between;
   align-items: center;
+  margin-top: 20px;
 }
 
 #header .profile .social-links a {
   font-size: 18px;
-  display: inline-block;
+  display: flex;
   background: #fff;
   color: #000000;
   line-height: 1;
@@ -126,12 +129,18 @@ ul {
   width: 36px;
   height: 36px;
   transition: 0.3s;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
 
 #header .profile .social-links a:hover {
-  background: #ffc107;
-  color: #000000;
+  background: #000000;
+  color: #ffffff;
   text-decoration: none;
+  border-style: solid;
+  border-color: #ffffff;
+  border-width: 1px;
 }
 
 #main {
@@ -226,7 +235,9 @@ ul {
   justify-content: center;
   margin-top: 2rem;
 }
-
+.descripcion-correo{
+  margin-top: 20px;
+}
 /* Mobile Navigation */
 .mobile-nav-toggle {
   position: fixed;
@@ -237,8 +248,8 @@ ul {
   font-size: 24px;
   transition: all 0.4s;
   outline: none !important;
-  background-color: #ffc107;
-  color: #fff;
+  background-color: #ffffff;
+  color: #000;
   width: 40px;
   height: 40px;
   display: inline-flex;
@@ -248,7 +259,11 @@ ul {
   border-radius: 50px;
   cursor: pointer;
 }
-
+.titulo{
+  color: #fff;
+  font-size: 12px;
+  margin-bottom: 60px;
+}
 .mobile-nav-active {
   overflow: hidden;
 }
@@ -278,9 +293,13 @@ ul {
 
 .contacto {
   border-bottom: 1px solid #ffffff47;
-  margin-bottom: 6%;
+  margin-bottom: 3%;
 }
-
+.copyleft{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 .contacto strong,
 span {
   color: #ffffff;
@@ -297,19 +316,41 @@ span {
 .floating-wpp .floating-wpp-button {
   width: 46px !important;
   height: 46px !important;
-  margin-bottom: 10px !important;
+}
+.firma{
+  border-radius: 0% !important;
+  width: 150px;
+  height: 100px;
+  transform: rotate(-6deg);
+  -ms-transform: rotate(-6deg);
+  -webkit-transform: rotate(-6deg);
+  display: flex;
+  flex-direction: row;
+  width: -webkit-fill-available;
+  justify-content: center;
+  margin-bottom: -30px;
+
+}
+.firma-img{
+  width: 150px;
+  height: 80px;
+}
+.email {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 @media (max-width: 1199px) {
   .floating-wpp {
-    position: fixed !important;
     right: 0 !important;
     top: 0px !important;
-    background: #000 !important;
-    height: 100px !important;
+    height: 70px !important;
     bottom: 0px !important;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
+    flex-direction: row;
   }
 
   .container-mobile {
@@ -319,12 +360,10 @@ span {
     display: flex;
     align-items: center;
     flex-direction: column;
-    width: -webkit-fill-available;
-    margin-right: 15px;
+    width: 270px;
   }
 
   .contacto {
-    padding-bottom: 10%;
     border-bottom: 1px solid #ffffff47;
     margin-bottom: 6%;
     display: flex;
@@ -332,9 +371,13 @@ span {
     align-items: center;
   }
 
+  .creditos{
+    font-size: 10px;
+  }
+
   .floating-wpp .floating-wpp-button {
-    width: 46px !important;
-    height: 46px !important;
+    width: 40px !important;
+    height: 40px !important;
   }
 }
 
@@ -1238,12 +1281,23 @@ ul li::marker {
     padding-top: 10%;
   }
 
+
 }
 
 @media (max-height: 200px) {
 
   #header {
     display: none;
+  }
+  .social-links {
+    display: none;
+  }
+  .email {
+    display: none;
+  }
+
+  .floating-wpp {
+    height: 45px;
   }
 }
 
@@ -1259,24 +1313,31 @@ ul li::marker {
   #header .profile h1 {
     margin-top: 35px;
   }
-}
-
-@media (max-height: 600px) {
-  .contacto {
+  .social-links {
     display: none;
   }
+  .email {
+    display: none;
+  }
+  .floating-wpp {
+    height: 85px;
+  }
 
+}
+
+@media (max-height: 625px) {
   #header .profile h1 {
     margin-top: 35px;
+  }
+  #footer{
+    display: none;
   }
 }
 
 @media (min-height: 601px) {
   .contacto {
     display: flex;
+    flex-direction: column;
   }
 
-  #header .profile h1 {
-    margin-top: 35px;
-  }
 }
