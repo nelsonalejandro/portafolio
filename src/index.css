@@ -1,0 +1,269 @@
+@import "tailwindcss";
+
+:root {
+  /* Sport UI / Fitness App Palette */
+  --primary: #ffffff;
+  --bg-dark: #000000;
+  /* Pure Black */
+  --bg-card: #1c1c1e;
+  /* Dark Grey for Cards */
+  --bg-input: #2c2c2e;
+  --text-muted: #d1d5db;
+  --text-subtle: #9ca3af;
+
+  /* Sport UI Accents */
+  --lime-primary: #bef264;
+  /* Lime-400 equivalent - Energetic */
+  --lime-hover: #a3e635;
+  /* Lime-500 */
+
+  --accent-purple: #a855f7;
+  /* Subtle purple for gradients/variation */
+  --accent-blue: #3b82f6;
+
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  --radius-card: 24px;
+  --radius-pill: 9999px;
+
+  --card-glass-bg: rgba(28, 28, 30, 0.65);
+  --card-glass-border: rgba(255, 255, 255, 0.08);
+
+  /* Grid Background */
+  --grid-color: rgba(190, 242, 100, 0.15);
+  --grid-opacity: 0.8;
+}
+
+/* Light Theme Overrides */
+html.light {
+  --primary: #000000;
+  --bg-dark: #f0f0f5;
+  /* Light Greyish White */
+  --bg-card: #ffffff;
+  --bg-input: #e4e4e7;
+  --text-muted: #374151;
+  --text-subtle: #6b7280;
+  --lime-primary: #84cc16;
+  /* Darker Lime for Light Mode contrast */
+  --accent-purple: #9333ea;
+  --accent-blue: #2563eb;
+
+  --card-glass-bg: rgba(255, 255, 255, 0.7);
+  --card-glass-border: rgba(0, 0, 0, 0.08);
+
+  /* Grid Background for Light Theme */
+  --grid-color: rgba(132, 204, 22, 0.35);
+  --grid-opacity: 1;
+}
+
+html.light .border-white\/5 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background-color: var(--bg-dark);
+  font-family: var(--font-body);
+  color: var(--primary);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-card);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--lime-primary);
+}
+
+/* Utilities */
+.sport-card {
+  background-color: var(--card-glass-bg);
+  border: 1px solid var(--card-glass-border);
+  border-radius: var(--radius-card);
+  padding: 1.5rem;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.glass-panel {
+  background: #1c1c1e;
+  /* Fallback */
+  background: rgba(28, 28, 30, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-card);
+}
+
+.action-btn {
+  background-color: var(--lime-primary);
+  color: #000000;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-pill);
+  transition: transform 0.2s, background-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+.action-btn:hover {
+  background-color: var(--lime-hover);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: var(--bg-input);
+  color: var(--primary);
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-pill);
+  transition: background-color 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.text-lime {
+  color: var(--lime-primary);
+}
+
+.text-outline-lime {
+  -webkit-text-stroke: 1px var(--lime-primary);
+  color: transparent;
+}
+
+.max-w-8xl {
+  max-width: 88rem;
+}
+
+/* Stat Ring Animation Support */
+@keyframes dash {
+  from {
+    stroke-dashoffset: 283;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Print Styles */
+@media print {
+  @page {
+    size: A4;
+    margin: 2cm;
+  }
+
+  html, body {
+    background: white !important;
+    color: black !important;
+    font-size: 11px !important;
+  }
+
+  html {
+    --bg-dark: white !important;
+    --primary: black !important;
+    --bg-card: white !important;
+    --bg-input: #f0f0f0 !important;
+    --text-muted: #333 !important;
+    --text-subtle: #666 !important;
+    --lime-primary: #10b981 !important;
+    --accent-purple: #7c3aed !important;
+    --accent-blue: #2563eb !important;
+    --card-glass-bg: white !important;
+    --card-glass-border: #ccc !important;
+  }
+
+  * {
+    color: black !important;
+    background: transparent !important;
+  }
+
+  .fixed, .hidden-print, #ai-chat, .scene-3d, .language-switcher, .theme-toggle {
+    display: none !important;
+  }
+
+  main {
+    max-width: none !important;
+    padding: 10px !important;
+    border: 2px solid #000 !important;
+  }
+
+  .grid {
+    display: block !important;
+  }
+
+  [class*="lg:col-span"] {
+    width: 100% !important;
+    margin-bottom: 15px !important;
+  }
+
+  section {
+    page-break-inside: avoid;
+    margin: 0 !important;
+    border: none !important;
+    background: white !important;
+    padding: 10px !important;
+    overflow: visible !important;
+  }
+
+  .sport-card {
+    background: white !important;
+    border: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .no-print, .map-card, .contact-card {
+    display: none !important;
+  }
+
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .signature-img {
+    height: 40px !important;
+    width: auto !important;
+  }
+
+  .print-break {
+    page-break-before: always;
+  }
+}
