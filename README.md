@@ -117,6 +117,18 @@ Los archivos de producción estarán en la carpeta `dist`.
 - **Internacionalización**: Soporte para español e inglés
 - **Animaciones**: Transiciones suaves con Framer Motion
 - **Impresión Optimizada**: Estilos especiales para impresión en PDF
+- **AI Chat Assistant**: Asistente virtual "El Socio" con reconocimiento de voz y síntesis de voz
+  - Integración con OpenRouter (Grok, Gemini, Llama 3, DeepSeek)
+  - Reconocimiento de voz en español
+  - Síntesis de voz con voz masculina (Jorge)
+  - Contexto de conversación persistente
+- **Google Tag Manager**: Análisis de tráfico y comportamiento de usuarios
+
+### Variables de Entorno
+Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+```env
+VITE_OPENROUTER_API_KEY=tu_api_key_de_openrouter
+```
 
 ## 📄 Licencia
 
