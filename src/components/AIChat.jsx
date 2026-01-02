@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, MicOff, Volume2, X, MessageCircle, Settings } from 'lucide-react';
+import { Mic, MicOff, Volume2, X, MessageCircle, Settings, Send } from 'lucide-react';
 import OpenAI from "openai";
 
+// Move constants closer to component to ensure they are ready
 const MODELS = [
     { id: 'x-ai/grok-code-fast-1', name: 'Grok Code Fast (X.AI)' },
     { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash' },
@@ -52,13 +53,14 @@ INSTRUCCIONES DE PERSONALIDAD:
 - Agrega unos Jajaja de vez en cuando si es un Chiste o sarcasmo lo que se le dice al cliente.
 - Si te preguntan algo fuera de tu conocimiento, di: "Esa información se la guarda para él, pero puedes escribirle directamente a este correo nelsonalejandroramosrivera@gmail.com".`;
 
-export default function AIChat({ onSpeakingChange }) {
+const AIChat = ({ onSpeakingChange }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [transcript, setTranscript] = useState('');
-    const transcriptRef = React.useRef(''); // Ref to access latest transcript in callbacks
-    const messagesEndRef = React.useRef(null); // Ref for auto-scroll
+    const [inputValue, setInputValue] = useState('');
+    const transcriptRef = useRef(''); // Ref to access latest transcript in callbacks
+    const messagesEndRef = useRef(null); // Ref for auto-scroll
 
     const [messages, setMessages] = useState([
         { role: 'assistant', content: '¡Hola! Soy El Socio. ¿Cómo estás? Por el momento Nelson me indica que esta programando ☕ y me indica que debo atender tus preguntas, soy su colaborador y me mantiene actualizado con sus ultimos movimientos, aunque se que me oculta informacion y no paga bien, no se lo digas 🤫, presiona el icono del microfono y realizame preguntas' }
@@ -86,50 +88,6 @@ export default function AIChat({ onSpeakingChange }) {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // Speech Recognition
-    const startListening = useCallback(() => {
-        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            setError('Tu navegador no soporta reconocimiento de voz');
-            return;
-        }
-
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-
-        recognition.lang = 'es-ES';
-        recognition.continuous = false;
-        recognition.interimResults = true;
-
-        recognition.onstart = () => setIsListening(true);
-
-        recognition.onresult = (event) => {
-            const current = event.resultIndex;
-            const transcriptText = event.results[current][0].transcript;
-            setTranscript(transcriptText);
-            transcriptRef.current = transcriptText; // Update ref
-        };
-
-        recognition.onend = () => {
-            setIsListening(false);
-            const finalTranscript = transcriptRef.current;
-            if (finalTranscript && finalTranscript.trim()) {
-                sendMessage(finalTranscript);
-            }
-        };
-
-        recognition.onerror = (event) => {
-            setIsListening(false);
-            // Ignore no-speech error which happens often
-            if (event.error !== 'no-speech') {
-                setError(`Error de reconocimiento: ${event.error}`);
-            }
-        };
-
-        recognition.start();
-        setTranscript('');
-        transcriptRef.current = '';
-    }, []);
-
     // Text to Speech
     const speak = useCallback((text) => {
         if (!('speechSynthesis' in window)) {
@@ -149,11 +107,12 @@ export default function AIChat({ onSpeakingChange }) {
 
         // Try to find a Spanish male voice
         const voices = window.speechSynthesis.getVoices();
-
         const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
 
-        // Use only Jorge voice (most common male Spanish voice on macOS)
-        const preferredVoice = spanishVoices.find(v => v.name.includes('Jorge'));
+        // Priority: Jorge (Mac/iOS), then any male-ish Spanish voice, then first Spanish voice
+        const preferredVoice = spanishVoices.find(v => v.name.includes('Jorge')) ||
+            spanishVoices.find(v => v.name.toLowerCase().includes('male')) ||
+            spanishVoices[0];
 
         if (preferredVoice) utterance.voice = preferredVoice;
 
@@ -165,14 +124,12 @@ export default function AIChat({ onSpeakingChange }) {
     }, []);
 
     // Send message to OpenRouter via OpenAI SDK
-    const sendMessage = async (userMessage) => {
+    const sendMessage = useCallback(async (userMessage) => {
         if (!apiKey) {
             setShowSettings(true);
             setError('Faltan configuraciones: API Key no encontrada en .env (VITE_OPENROUTER_API_KEY)');
             return;
         }
-
-
 
         const newMessages = [...messages, { role: 'user', content: userMessage }];
         setMessages(newMessages);
@@ -197,8 +154,6 @@ export default function AIChat({ onSpeakingChange }) {
                     content: msg.content
                 }));
 
-
-
             const completion = await client.chat.completions.create({
                 model: selectedModel,
                 messages: [
@@ -219,6 +174,112 @@ export default function AIChat({ onSpeakingChange }) {
             setError(`Error: ${err.message}`);
         } finally {
             setIsProcessing(false);
+        }
+    }, [apiKey, messages, selectedModel, speak]);
+
+    // Speech Recognition
+    const startListening = useCallback(async () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            setError('Tu navegador no soporta reconocimiento de voz. Usa Chrome o Safari.');
+            return;
+        }
+
+        if (!window.isSecureContext) {
+            setError('El acceso al micrófono requiere una conexión HTTPS segura.');
+            return;
+        }
+
+        setError('');
+        setIsListening(true);
+        setTranscript('');
+        transcriptRef.current = '';
+
+        // UNLOCK AUDIO FOR SAFARI (Crucial for mobile)
+        if ('speechSynthesis' in window) {
+            const silent = new SpeechSynthesisUtterance(' ');
+            silent.volume = 0;
+            window.speechSynthesis.speak(silent);
+        }
+
+        try {
+            // FORCE OS PERMISSION PROMPT
+            // On Mobile Chrome, getUserMedia is often more reliable than SpeechRecognition for the first prompt
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach(track => track.stop()); // Release mic immediately
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'es-ES';
+            recognition.continuous = false;
+            recognition.interimResults = true;
+
+            let silenceTimer;
+            const resetSilenceTimer = () => {
+                clearTimeout(silenceTimer);
+                silenceTimer = setTimeout(() => recognition.stop(), 2000); // 2s silence detection
+            };
+
+            recognition.onstart = () => {
+                setIsListening(true);
+                resetSilenceTimer();
+            };
+
+            recognition.onresult = (event) => {
+                const current = event.resultIndex;
+                const transcriptText = event.results[current][0].transcript;
+                setTranscript(transcriptText);
+                transcriptRef.current = transcriptText;
+                resetSilenceTimer();
+            };
+
+            recognition.onend = () => {
+                setIsListening(false);
+                clearTimeout(silenceTimer);
+                const finalTranscript = transcriptRef.current;
+                if (finalTranscript && finalTranscript.trim()) {
+                    sendMessage(finalTranscript);
+                }
+            };
+
+            recognition.onerror = (event) => {
+                setIsListening(false);
+                clearTimeout(silenceTimer);
+
+                if (event.error === 'not-allowed') {
+                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                    const isAndroid = /Android/.test(navigator.userAgent);
+                    let helpMsg = 'Permiso denegado.';
+
+                    if (isIOS) {
+                        helpMsg = 'Permiso denegado. Ve a Ajustes > Chrome > Micrófono y actívalo. También revisa el candado de la URL.';
+                    } else if (isAndroid) {
+                        helpMsg = 'Permiso denegado. Ve a Ajustes > Aplicaciones > Chrome > Permisos > Micrófono.';
+                    }
+                    setError(helpMsg);
+                } else if (event.error !== 'no-speech') {
+                    setError(`Error de voz: ${event.error}`);
+                }
+            };
+
+            recognition.start();
+
+        } catch (err) {
+            console.error('Mic Access Error:', err);
+            setIsListening(false);
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                setError('Micrófono bloqueado. Habilítalo en los ajustes de tu teléfono para esta app/navegador.');
+            } else {
+                setError('No se pudo acceder al micrófono. Verifica que ninguna otra app lo esté usando.');
+            }
+        }
+    }, [sendMessage]);
+
+    const handleTextSubmit = (e) => {
+        e.preventDefault();
+        if (inputValue.trim() && !isProcessing) {
+            sendMessage(inputValue.trim());
+            setInputValue('');
         }
     };
 
@@ -342,38 +403,60 @@ export default function AIChat({ onSpeakingChange }) {
                         )}
 
                         {/* Controls */}
-                        <div className="p-4 border-t border-white/10 flex items-center justify-center gap-4">
-                            <motion.button
-                                onClick={startListening}
-                                disabled={isListening || isProcessing || isSpeaking}
-                                className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isListening
-                                    ? 'bg-red-500 animate-pulse'
-                                    : (isSpeaking ? 'bg-gray-700 cursor-not-allowed opacity-50' : 'bg-gradient-to-r from-[#7c3aed] to-[#22d3ee] hover:shadow-[0_0_20px_rgba(34,211,238,0.5)]')
-                                    }`}
-                                whileTap={!isSpeaking && !isProcessing ? { scale: 0.95 } : {}}
-                            >
-                                {isListening ? <MicOff size={24} color="white" /> : <Mic size={24} color="white" />}
-                            </motion.button>
-
-                            {isSpeaking && (
-                                <motion.button
-                                    initial={{ opacity: 0, scale: 0 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    onClick={() => {
-                                        window.speechSynthesis.cancel();
-                                        setIsSpeaking(false);
-                                    }}
-                                    className="w-14 h-14 rounded-full bg-red-500 flex items-center justify-center shadow-lg hover:bg-red-600 hover:shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-all"
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.95 }}
+                        <div className="p-4 border-t border-white/10 space-y-4">
+                            <form onSubmit={handleTextSubmit} className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    placeholder="Escribe un mensaje..."
+                                    disabled={isProcessing || isListening}
+                                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-[#22d3ee] transition-colors disabled:opacity-50"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={!inputValue.trim() || isProcessing || isListening}
+                                    className="w-10 h-10 rounded-xl bg-[#7c3aed] flex items-center justify-center hover:bg-[#6d28d9] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <X size={24} color="white" />
+                                    <Send size={18} color="white" />
+                                </button>
+                            </form>
+
+                            <div className="flex items-center justify-center gap-4">
+                                <motion.button
+                                    onClick={startListening}
+                                    disabled={isListening || isProcessing || isSpeaking}
+                                    className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isListening
+                                        ? 'bg-red-500 animate-pulse'
+                                        : (isSpeaking ? 'bg-gray-700 cursor-not-allowed opacity-50' : 'bg-gradient-to-r from-[#7c3aed] to-[#22d3ee] hover:shadow-[0_0_20px_rgba(34,211,238,0.5)]')
+                                        }`}
+                                    whileTap={!isSpeaking && !isProcessing ? { scale: 0.95 } : {}}
+                                >
+                                    {isListening ? <MicOff size={24} color="white" /> : <Mic size={24} color="white" />}
                                 </motion.button>
-                            )}
+
+                                {isSpeaking && (
+                                    <motion.button
+                                        initial={{ opacity: 0, scale: 0 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        onClick={() => {
+                                            window.speechSynthesis.cancel();
+                                            setIsSpeaking(false);
+                                        }}
+                                        className="w-14 h-14 rounded-full bg-red-500 flex items-center justify-center shadow-lg hover:bg-red-600 hover:shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-all"
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <X size={24} color="white" />
+                                    </motion.button>
+                                )}
+                            </div>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
         </>
     );
-}
+};
+
+export default AIChat;
