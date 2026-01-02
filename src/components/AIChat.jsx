@@ -2,7 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, MicOff, Volume2, X, MessageCircle, Settings } from 'lucide-react';
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const MODELS = [
+    { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite' },
+    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+    { id: 'gemini-2.5-flash-preview', name: 'Gemini 2.5 Flash Preview' },
+    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Stable)' },
+    { id: 'gemma-3n', name: 'Gemma 3N' }
+];
 
 const SYSTEM_PROMPT = `Eres Nelson Ramos, un Ingeniero en Informática y Desarrollador Full-Stack chileno con más de 5 años de experiencia. 
 Respondes preguntas sobre tu experiencia, habilidades y proyectos de manera profesional pero amigable.
@@ -31,22 +37,34 @@ export default function AIChat({ onSpeakingChange }) {
     const [isListening, setIsListening] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [transcript, setTranscript] = useState('');
-    const [messages, setMessages] = useState([]);
+    const transcriptRef = React.useRef(''); // Ref to access latest transcript in callbacks
+    const messagesEndRef = React.useRef(null); // Ref for auto-scroll
+
+    const [messages, setMessages] = useState([
+        { role: 'assistant', content: '¡Hola! ¿Cómo estás? Soy Nelson Ramos, un gusto saludarte. ¿Hay algo en lo que pueda ayudarte o alguna pregunta que tengas para mí?' }
+    ]);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [apiKey, setApiKey] = useState('');
+
+    // Initialize state with priority: Env Var only as per requirements
+    const [apiKey] = useState(import.meta.env.VITE_GOOGLE_API_KEY || '');
+
+    // Initialize model from storage or default
+    const [selectedModel, setSelectedModel] = useState(() => {
+        return localStorage.getItem('gemini_model') || MODELS[1].id; // Default to gemini-2.5-flash
+    });
+
     const [showSettings, setShowSettings] = useState(false);
     const [error, setError] = useState('');
-
-    // Load API key from localStorage
-    useEffect(() => {
-        const savedKey = localStorage.getItem('gemini_api_key');
-        if (savedKey) setApiKey(savedKey);
-    }, []);
 
     // Notify parent of speaking state
     useEffect(() => {
         onSpeakingChange?.(isSpeaking);
     }, [isSpeaking, onSpeakingChange]);
+
+    // Auto-scroll to bottom
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
 
     // Speech Recognition
     const startListening = useCallback(() => {
@@ -57,34 +75,40 @@ export default function AIChat({ onSpeakingChange }) {
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
-        
+
         recognition.lang = 'es-ES';
         recognition.continuous = false;
         recognition.interimResults = true;
 
         recognition.onstart = () => setIsListening(true);
-        
+
         recognition.onresult = (event) => {
             const current = event.resultIndex;
             const transcriptText = event.results[current][0].transcript;
             setTranscript(transcriptText);
+            transcriptRef.current = transcriptText; // Update ref
         };
 
         recognition.onend = () => {
             setIsListening(false);
-            if (transcript.trim()) {
-                sendMessage(transcript);
+            const finalTranscript = transcriptRef.current;
+            if (finalTranscript && finalTranscript.trim()) {
+                sendMessage(finalTranscript);
             }
         };
 
         recognition.onerror = (event) => {
             setIsListening(false);
-            setError(`Error de reconocimiento: ${event.error}`);
+            // Ignore no-speech error which happens often
+            if (event.error !== 'no-speech') {
+                setError(`Error de reconocimiento: ${event.error}`);
+            }
         };
 
         recognition.start();
         setTranscript('');
-    }, [transcript]);
+        transcriptRef.current = '';
+    }, []);
 
     // Text to Speech
     const speak = useCallback((text) => {
@@ -94,16 +118,26 @@ export default function AIChat({ onSpeakingChange }) {
         }
 
         window.speechSynthesis.cancel();
-        
+
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'es-ES';
         utterance.rate = 1;
         utterance.pitch = 1;
 
-        // Try to find a Spanish voice
+        // Try to find a Spanish male voice
         const voices = window.speechSynthesis.getVoices();
-        const spanishVoice = voices.find(v => v.lang.startsWith('es'));
-        if (spanishVoice) utterance.voice = spanishVoice;
+        const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
+
+        // Priority list of common male voice names
+        const maleKeywords = ['Pablo'];
+        //####### OTRAS OPCIONES#############
+        //'Diego' 'Jorge', 'Pablo', 'Raul', 'Daniel', 'Alvaro'
+        //####################################
+        const preferredVoice = spanishVoices.find(v =>
+            maleKeywords.some(keyword => v.name.includes(keyword))
+        ) || spanishVoices[0];
+
+        if (preferredVoice) utterance.voice = preferredVoice;
 
         utterance.onstart = () => setIsSpeaking(true);
         utterance.onend = () => setIsSpeaking(false);
@@ -116,9 +150,12 @@ export default function AIChat({ onSpeakingChange }) {
     const sendMessage = async (userMessage) => {
         if (!apiKey) {
             setShowSettings(true);
-            setError('Configura tu API Key de Gemini primero');
+            setError('Faltan configuraciones: API Key no encontrada en .env');
             return;
         }
+
+        console.log('Sending message to Gemini...');
+        console.log('Model:', selectedModel);
 
         const newMessages = [...messages, { role: 'user', content: userMessage }];
         setMessages(newMessages);
@@ -133,7 +170,10 @@ export default function AIChat({ onSpeakingChange }) {
                 parts: [{ text: msg.content }]
             }));
 
-            const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+            // Use simple generateContent endpoint with query param to avoid CORS issues with headers
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -145,14 +185,14 @@ export default function AIChat({ onSpeakingChange }) {
                             parts: [{ text: SYSTEM_PROMPT }]
                         },
                         {
-                            role: 'model', 
+                            role: 'model',
                             parts: [{ text: 'Entendido. Soy Nelson Ramos, desarrollador Full-Stack. ¿En qué puedo ayudarte?' }]
                         },
                         ...conversationHistory
                     ],
                     generationConfig: {
                         temperature: 0.7,
-                        maxOutputTokens: 150,
+                        maxOutputTokens: 1000,
                     }
                 })
             });
@@ -169,15 +209,19 @@ export default function AIChat({ onSpeakingChange }) {
             speak(aiMessage);
 
         } catch (err) {
+            console.error(err);
             setError(`Error: ${err.message}`);
         } finally {
             setIsProcessing(false);
         }
     };
 
-    const saveApiKey = (key) => {
+    const saveSettings = (key, model) => {
         localStorage.setItem('gemini_api_key', key);
-        setApiKey(key);
+        localStorage.setItem('gemini_model', model);
+        // Note: We don't update apiKey state here anymore as we strictly use env var
+        // setApiKey(key); 
+        setSelectedModel(model);
         setShowSettings(false);
         setError('');
     };
@@ -216,46 +260,54 @@ export default function AIChat({ onSpeakingChange }) {
 
                         {/* Settings panel */}
                         {showSettings && (
-                            <div className="p-4 border-b border-white/10 bg-black/30">
-                                <label className="text-xs text-gray-400 block mb-2">Google Gemini API Key</label>
-                                <input
-                                    type="password"
-                                    value={apiKey}
-                                    onChange={(e) => setApiKey(e.target.value)}
-                                    placeholder="AIza..."
-                                    className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#22d3ee]"
-                                />
-                                <a 
-                                    href="https://aistudio.google.com/app/apikey" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-xs text-[#22d3ee] hover:underline block mt-2"
-                                >
-                                    Obtener API Key gratis →
-                                </a>
+                            <div className="p-4 border-b border-white/10 bg-black/30 space-y-4">
+                                <div>
+                                    <label className="text-xs text-gray-400 block mb-2">Google Gemini API Key</label>
+                                    <input
+                                        type="password"
+                                        value={apiKey}
+                                        readOnly
+                                        placeholder="AIza..."
+                                        className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-gray-400 cursor-not-allowed focus:outline-none"
+                                        title="Configurado vía .env"
+                                    />
+                                    <p className="text-[10px] text-gray-500 mt-1">
+                                        API Key configurada en variables de entorno.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label className="text-xs text-gray-400 block mb-2">Modelo</label>
+                                    <select
+                                        value={selectedModel}
+                                        onChange={(e) => setSelectedModel(e.target.value)}
+                                        className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#22d3ee]"
+                                    >
+                                        {MODELS.map(model => (
+                                            <option key={model.id} value={model.id} className="bg-[#0a0a1a]">
+                                                {model.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
                                 <button
-                                    onClick={() => saveApiKey(apiKey)}
-                                    className="mt-2 w-full bg-[#7c3aed] text-white py-2 rounded text-sm font-bold hover:bg-[#6d28d9] transition-colors"
+                                    onClick={() => saveSettings(apiKey, selectedModel)}
+                                    className="w-full bg-[#7c3aed] text-white py-2 rounded text-sm font-bold hover:bg-[#6d28d9] transition-colors"
                                 >
-                                    Guardar
+                                    Guardar Configuración
                                 </button>
                             </div>
                         )}
 
                         {/* Messages */}
                         <div className="h-64 overflow-y-auto p-4 space-y-3">
-                            {messages.length === 0 && (
-                                <p className="text-gray-500 text-sm text-center">
-                                    Haz clic en el micrófono y pregúntame sobre mi experiencia
-                                </p>
-                            )}
                             {messages.map((msg, i) => (
                                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[80%] px-3 py-2 rounded-lg text-sm ${
-                                        msg.role === 'user' 
-                                            ? 'bg-[#7c3aed] text-white' 
-                                            : 'bg-white/10 text-gray-200'
-                                    }`}>
+                                    <div className={`max-w-[80%] px-3 py-2 rounded-lg text-sm ${msg.role === 'user'
+                                        ? 'bg-[#7c3aed] text-white'
+                                        : 'bg-white/10 text-gray-200'
+                                        }`}>
                                         {msg.content}
                                     </div>
                                 </div>
@@ -264,13 +316,14 @@ export default function AIChat({ onSpeakingChange }) {
                                 <div className="flex justify-start">
                                     <div className="bg-white/10 px-4 py-2 rounded-lg">
                                         <div className="flex gap-1">
-                                            <span className="w-2 h-2 bg-[#22d3ee] rounded-full animate-bounce" style={{animationDelay: '0ms'}} />
-                                            <span className="w-2 h-2 bg-[#22d3ee] rounded-full animate-bounce" style={{animationDelay: '150ms'}} />
-                                            <span className="w-2 h-2 bg-[#22d3ee] rounded-full animate-bounce" style={{animationDelay: '300ms'}} />
+                                            <span className="w-2 h-2 bg-[#22d3ee] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                            <span className="w-2 h-2 bg-[#22d3ee] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                            <span className="w-2 h-2 bg-[#22d3ee] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                         </div>
                                     </div>
                                 </div>
                             )}
+                            <div ref={messagesEndRef} />
                         </div>
 
                         {/* Error display */}
@@ -292,16 +345,15 @@ export default function AIChat({ onSpeakingChange }) {
                             <motion.button
                                 onClick={startListening}
                                 disabled={isListening || isProcessing}
-                                className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
-                                    isListening 
-                                        ? 'bg-red-500 animate-pulse' 
-                                        : 'bg-gradient-to-r from-[#7c3aed] to-[#22d3ee] hover:shadow-[0_0_20px_rgba(34,211,238,0.5)]'
-                                }`}
+                                className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isListening
+                                    ? 'bg-red-500 animate-pulse'
+                                    : 'bg-gradient-to-r from-[#7c3aed] to-[#22d3ee] hover:shadow-[0_0_20px_rgba(34,211,238,0.5)]'
+                                    }`}
                                 whileTap={{ scale: 0.95 }}
                             >
                                 {isListening ? <MicOff size={24} color="white" /> : <Mic size={24} color="white" />}
                             </motion.button>
-                            
+
                             {isSpeaking && (
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0 }}

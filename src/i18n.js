@@ -171,7 +171,7 @@ const resources = {
                     technician: {
                         title: "Técnico en plataformas Informáticas",
                         institution: "I.P Santo Tomas",
-                        period: "2009 - 2013"
+                        period: "2009 - 2012"
                     },
                     telecom: {
                         title: "Técnico en telecomunicaciones",
@@ -367,7 +367,7 @@ const resources = {
                     technician: {
                         title: "Technician in Computer Platforms",
                         institution: "I.P Santo Tomas",
-                        period: "2009 - 2013"
+                        period: "2009 - 2012"
                     },
                     telecom: {
                         title: "Telecommunications Technician",
