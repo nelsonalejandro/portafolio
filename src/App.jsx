@@ -8,6 +8,7 @@ import Certifications from './components/Certifications';
 import Experience from './components/Experience';
 import Education from './components/Education';
 import MapCard from './components/MapCard';
+import AutocreativaCard from './components/AutocreativaCard';
 import Contact from './components/Contact';
 import Signature from './components/Signature';
 import CombinedSkills from './components/CombinedSkills';
@@ -71,6 +72,7 @@ function App() {
             <div className="lg:col-span-4 flex flex-col gap-8">
               <SoftSkills />
               <Certifications />
+              <AutocreativaCard />
               <Contact />
               <Signature theme={theme} />
             </div>

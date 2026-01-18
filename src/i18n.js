@@ -196,6 +196,14 @@ const resources = {
             mapCard: {
                 title: "¡Vamos a programar juntos!",
                 description: "Soy un apasionado programador full-stack. Si quieres charlar sobre código, tomar un café virtual o explorar ideas con vibe coding, ¡estoy aquí!"
+            },
+            autocreativa: {
+                title: "Autocreativa",
+                description: "Te invito a visitar mi iniciativa: Somos una agencia de productos digitales. Desarrollamos soluciones personalizadas con IA, automatizaciones y tecnología de punta para llevar tu negocio al siguiente nivel.",
+                feature1: "Productos Digitales",
+                feature2: "Desarrollo con IA",
+                feature3: "Capacitaciones Online",
+                cta: "Visitar"
             }
         }
     },
@@ -392,6 +400,14 @@ const resources = {
             mapCard: {
                 title: "Let's code together!",
                 description: "I'm a passionate full-stack programmer. If you want to chat about code, grab a virtual coffee, or explore ideas with vibe coding, I'm here! Location of the Amalfi building."
+            },
+            autocreativa: {
+                title: "Autocreativa",
+                description: "I invite you to visit my initiative: We are a digital products agency developing customized solutions with AI, automations, and cutting-edge technology to take your business to the next level.",
+                feature1: "Digital Products",
+                feature2: "AI-Powered Development",
+                feature3: "Online Training",
+                cta: "Visit"
             }
         }
     }

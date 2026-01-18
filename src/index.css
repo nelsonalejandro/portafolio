@@ -182,6 +182,35 @@ h6 {
   }
 }
 
+/* Autocreativa Card Styles */
+/* Autocreativa Card Styles */
+.autocreativa-card {
+  background-color: rgb(28 28 30) !important;
+}
+
+.autocreativa-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #a855f7 0%, #3b82f6 50%, #bef264 100%);
+  z-index: 20;
+}
+
+/* Animated Gradient Text */
+.animate-gradient-text {
+  background-size: 200% auto;
+  animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+  to {
+    background-position: -200% center;
+  }
+}
+
 /* Print Styles */
 @media print {
   @page {
@@ -189,7 +218,8 @@ h6 {
     margin: 2cm;
   }
 
-  html, body {
+  html,
+  body {
     background: white !important;
     color: black !important;
     font-size: 11px !important;
@@ -214,7 +244,12 @@ h6 {
     background: transparent !important;
   }
 
-  .fixed, .hidden-print, #ai-chat, .scene-3d, .language-switcher, .theme-toggle {
+  .fixed,
+  .hidden-print,
+  #ai-chat,
+  .scene-3d,
+  .language-switcher,
+  .theme-toggle {
     display: none !important;
   }
 
@@ -249,7 +284,9 @@ h6 {
     backdrop-filter: none !important;
   }
 
-  .no-print, .map-card, .contact-card {
+  .no-print,
+  .map-card,
+  .contact-card {
     display: none !important;
   }
 
