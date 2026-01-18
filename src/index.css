@@ -185,7 +185,7 @@ h6 {
 /* Autocreativa Card Styles */
 /* Autocreativa Card Styles */
 .autocreativa-card {
-  background-color: rgb(28 28 30) !important;
+  background-color: var(--card-glass-bg) !important;
 }
 
 .autocreativa-card::before {
