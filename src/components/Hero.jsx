@@ -3,9 +3,11 @@ import { motion } from 'framer-motion';
 import { Trophy, Activity, Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import profileImg from '../assets/perfil.png';
+import profileLightImg from '../assets/perfil_white.png';
 
-const Hero = () => {
+const Hero = ({ theme }) => {
     const { t } = useTranslation();
+    const profileSrc = theme === 'light' ? profileLightImg : profileImg;
 
     const handleImageError = (e) => {
         e.target.style.display = 'none';
@@ -22,7 +24,7 @@ const Hero = () => {
                     <div className="relative">
                         <div className="w-24 h-24 rounded-full bg-cover bg-center border-2 border-[var(--lime-primary)] overflow-hidden bg-[var(--bg-card)]">
                             <img
-                                src={profileImg}
+                                src={profileSrc}
                                 alt="Profile"
                                 onError={handleImageError}
                                 className="w-full h-full object-cover"

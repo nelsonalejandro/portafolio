@@ -204,6 +204,24 @@ const resources = {
                 feature2: "Desarrollo con IA",
                 feature3: "Capacitaciones Online",
                 cta: "Visitar"
+            },
+            signature: {
+                title: "Mi Filosofía",
+                intro: "Trabajo bajo una filosofía que me ha permitido entregar proyectos sólidos, eficientes y con un toque único: <strong>Trabajo Remoto y Vibe Coding</strong>.",
+                remote: {
+                    title: "🌍 <strong>Trabajo Remoto</strong>",
+                    desc: "No importa dónde estés, puedo desarrollar, optimizar y entregar soluciones sin límites geográficos. Esto me da la flexibilidad de trabajar de forma estratégica, manteniendo un flujo constante y una comunicación ágil para que todo avance sin fricciones."
+                },
+                vibe: {
+                    title: "💻 <strong>Vibe Coding</strong>",
+                    desc: "Para mí, programar es más que escribir líneas de código: es un ambiente, una energía. Mi kit incluye Cursor para acelerar el desarrollo con IA, VS Code y suite de Jetbrains para personalizar cada proyecto y sí… una buena taza de café y música lo-fi que me acompañan hasta en las madrugadas de inspiración. El resultado: código limpio, escalable y pensado para durar."
+                },
+                promise: {
+                    title: "✨ <strong>Mi promesa</strong>",
+                    desc: "Cada proyecto lo trato como si fuera propio: cuidando los detalles, optimizando recursos y asegurando que el resultado no solo cumpla, sino que impresione. Aquí no hay excusas, solo compromiso y resultados."
+                },
+                copyleft: "© Copyleft Nelson Ramos",
+                location: "Talca, VII Región del Maule, Chile"
             }
         }
     },
@@ -408,6 +426,24 @@ const resources = {
                 feature2: "AI-Powered Development",
                 feature3: "Online Training",
                 cta: "Visit"
+            },
+            signature: {
+                title: "My Philosophy",
+                intro: "I work under a philosophy that allows me to deliver solid, efficient projects with a unique touch: <strong>Remote Work and Vibe Coding</strong>.",
+                remote: {
+                    title: "🌍 <strong>Remote Work</strong>",
+                    desc: "No matter where you are, I can develop, optimize, and deliver solutions without geographical limits. This gives me the flexibility to work strategically, maintaining a constant flow and agile communication so that everything moves forward without friction."
+                },
+                vibe: {
+                    title: "💻 <strong>Vibe Coding</strong>",
+                    desc: "For me, programming is more than writing lines of code: it's an atmosphere, an energy. My kit includes Cursor to accelerate development with AI, VS Code, and the Jetbrains suite to customize every project, and yes... a good cup of coffee and lo-fi music that accompany me even in the late hours of inspiration. The result: clean, scalable code designed to last."
+                },
+                promise: {
+                    title: "✨ <strong>My Promise</strong>",
+                    desc: "I treat every project as if it were my own: taking care of details, optimizing resources, and ensuring the result not only complies but impresses. No excuses here, only commitment and results."
+                },
+                copyleft: "© Copyleft Nelson Ramos",
+                location: "Talca, VII Maule Region, Chile"
             }
         }
     }

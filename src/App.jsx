@@ -52,7 +52,7 @@ function App() {
 
       {/* Content Layer */}
       <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Hero />
+        <Hero theme={theme} />
 
         <div className="space-y-8 pb-20">
           {/* Dashboard Grid Layout for Desktop */}
