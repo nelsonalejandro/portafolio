@@ -22,7 +22,8 @@ export default function Experience() {
                 <h3 className="text-xl font-bold text-[var(--primary)] font-[var(--font-display)]">{t('experience.title')}</h3>
                 <a
                     href={curriculumPdf}
-                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="bg-[var(--lime-primary)] text-black px-4 py-2 rounded-xl font-bold text-xs hover:bg-opacity-80 transition-colors no-print"
                 >
                     {t('experience.downloadCv')}
