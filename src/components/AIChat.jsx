@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, MicOff, Volume2, X, MessageCircle, Settings, Send } from 'lucide-react';
-import OpenAI from "openai";
 
-// Move constants closer to component to ensure they are ready
+// Configuración del proveedor ApiFreeLLM (solo frontend)
+const DEFAULT_APIFREELLM_ENDPOINT = import.meta.env.DEV
+    ? '/api/freellm/chat'
+    : '/api/freellm/chat.php';
+const APIFREELLM_ENDPOINT = import.meta.env.VITE_APIFREELLM_ENDPOINT || DEFAULT_APIFREELLM_ENDPOINT;
+
+// Modelos visibles en UI (informativos)
 const MODELS = [
-    { id: 'x-ai/grok-code-fast-1', name: 'Grok Code Fast (X.AI)' },
-    { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash' },
-    { id: 'meta-llama/llama-3-8b-instruct', name: 'Llama 3 8B' },
-    { id: 'deepseek/deepseek-coder', name: 'DeepSeek Coder' }
+    { id: 'llama-3', name: 'Llama 3 (ApiFreeLLM)' },
 ];
 
 const SYSTEM_PROMPT = `Eres "El Socio", el Asistente Virtual y mano derecha de Nelson Ramos. Tu rol es actuar como un colaborador leal (aunque un poco mal pagado, según bromeas) que gestiona las consultas mientras Nelson está "ocupado programando y tomando café".
@@ -67,8 +69,8 @@ const AIChat = ({ onSpeakingChange }) => {
     ]);
     const [isProcessing, setIsProcessing] = useState(false);
 
-    // Initialize state (Strictly from Env Var)
-    const [apiKey] = useState(import.meta.env.VITE_OPENROUTER_API_KEY || '');
+    // API key estrictamente desde variables de entorno de Vite
+    const [apiKey] = useState(import.meta.env.DEV ? (import.meta.env.VITE_APIFREELLM_API_KEY || '') : '');
 
     // Initialize model from storage or default
     const [selectedModel, setSelectedModel] = useState(() => {
@@ -123,11 +125,28 @@ const AIChat = ({ onSpeakingChange }) => {
         window.speechSynthesis.speak(utterance);
     }, []);
 
-    // Send message to OpenRouter via OpenAI SDK
+    // Construir prompt para ApiFreeLLM a partir del historial
+    const buildPrompt = (messageList) => {
+        const conversationHistory = messageList
+            .slice(1) // Saltar mensaje de bienvenida inicial
+            .slice(-10)
+            .map(msg => `${msg.role.toUpperCase()}:\n${msg.content}`);
+
+        return [
+            `SYSTEM:\n${SYSTEM_PROMPT}`,
+            conversationHistory.length
+                ? 'CONVERSACIÓN:\n' + conversationHistory.join('\n\n')
+                : '',
+        ].filter(Boolean).join('\n\n');
+    };
+
+    // Enviar mensaje a ApiFreeLLM
     const sendMessage = useCallback(async (userMessage) => {
-        if (!apiKey) {
+        const usesPhpProxy = APIFREELLM_ENDPOINT.endsWith('.php');
+        const requiresClientKey = !usesPhpProxy;
+        if (requiresClientKey && !apiKey) {
             setShowSettings(true);
-            setError('Faltan configuraciones: API Key no encontrada en .env (VITE_OPENROUTER_API_KEY)');
+            setError('Faltan configuraciones: API Key no encontrada en .env (VITE_APIFREELLM_API_KEY)');
             return;
         }
 
@@ -138,33 +157,38 @@ const AIChat = ({ onSpeakingChange }) => {
         setError('');
 
         try {
-            const client = new OpenAI({
-                apiKey: apiKey,
-                baseURL: "https://openrouter.ai/api/v1",
-                dangerouslyAllowBrowser: true // Required for client-side usage
+            const prompt = buildPrompt(newMessages);
+
+            const headers = {
+                'Content-Type': 'application/json',
+                ...(apiKey && !usesPhpProxy ? { 'Authorization': `Bearer ${apiKey}` } : {}),
+            };
+
+            const response = await fetch(APIFREELLM_ENDPOINT, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    message: prompt,
+                }),
             });
 
-            // Build conversation history (exclude the initial welcome message)
-            // Map 'assistant' role correctly for OpenAI (it's 'assistant' not 'model')
-            const conversationHistory = newMessages
-                .slice(1) // Skip the welcome message (first message)
-                .slice(-10) // Keep last 10 messages
-                .map(msg => ({
-                    role: msg.role === 'assistant' ? 'assistant' : 'user',
-                    content: msg.content
-                }));
+            if (!response.ok) {
+                const text = await response.text().catch(() => '');
+                if (response.status === 401) {
+                    throw new Error('API key de ApiFreeLLM inválida o revocada (401).');
+                }
+                if (response.status === 429) {
+                    throw new Error('Límite de peticiones alcanzado en ApiFreeLLM (429). Intenta nuevamente en unos segundos.');
+                }
+                throw new Error(`Error de ApiFreeLLM (${response.status}): ${text || 'sin detalles'}`);
+            }
 
-            const completion = await client.chat.completions.create({
-                model: selectedModel,
-                messages: [
-                    { role: "system", content: SYSTEM_PROMPT },
-                    ...conversationHistory
-                ],
-                max_tokens: 1000,
-                temperature: 0.7,
-            });
+            const data = await response.json();
+            if (!data?.success) {
+                throw new Error('Respuesta inválida de ApiFreeLLM.');
+            }
 
-            const aiMessage = completion.choices[0].message.content;
+            const aiMessage = data.response || '';
 
             setMessages([...newMessages, { role: 'assistant', content: aiMessage }]);
             speak(aiMessage);
@@ -324,17 +348,17 @@ const AIChat = ({ onSpeakingChange }) => {
                         {showSettings && (
                             <div className="p-4 border-b border-white/10 bg-black/30 space-y-4">
                                 <div>
-                                    <label className="text-xs text-gray-400 block mb-2">OpenRouter API Key</label>
+                                    <label className="text-xs text-gray-400 block mb-2">ApiFreeLLM API Key</label>
                                     <input
                                         type="password"
                                         value={apiKey}
                                         readOnly
-                                        placeholder="sk-or-..."
+                                        placeholder="apf_..."
                                         className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-gray-400 cursor-not-allowed focus:outline-none"
                                         title="Configurado vía .env"
                                     />
                                     <p className="text-[10px] text-gray-500 mt-1">
-                                        API Key configurada en variables de entorno.
+                                        API Key configurada en variables de entorno (`VITE_APIFREELLM_API_KEY`).
                                     </p>
                                 </div>
 

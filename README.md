@@ -118,17 +118,48 @@ Los archivos de producción estarán en la carpeta `dist`.
 - **Animaciones**: Transiciones suaves con Framer Motion
 - **Impresión Optimizada**: Estilos especiales para impresión en PDF
 - **AI Chat Assistant**: Asistente virtual "El Socio" con reconocimiento de voz y síntesis de voz
-  - Integración con OpenRouter (Grok, Gemini, Llama 3, DeepSeek)
+  - Integración con ApiFreeLLM (modelo Llama 3)
   - Reconocimiento de voz en español
   - Síntesis de voz con voz masculina (Jorge)
   - Contexto de conversación persistente
+  - Proxy PHP para producción (cPanel/shared hosting) que evita CORS
 - **Google Tag Manager**: Análisis de tráfico y comportamiento de usuarios
 
 ### Variables de Entorno
 Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
 ```env
-VITE_OPENROUTER_API_KEY=tu_api_key_de_openrouter
+VITE_APIFREELLM_API_KEY=tu_api_key_de_apifreellm
 ```
+
+**Importante**: `VITE_APIFREELLM_API_KEY` solo se usa en desarrollo. En producción, la API key debe configurarse en el servidor (ver sección Deploy en Producción).
+
+### Deploy en Producción (cPanel/Shared Hosting)
+
+#### 1) Build
+```bash
+npm run build
+```
+
+#### 2) Subir archivos
+Sube **todo el contenido** de `dist/` a la carpeta raíz de tu dominio (ej. `public_html/`).
+
+#### 3) Configurar API key en el servidor
+El proxy PHP (`api/freellm/chat.php`) busca la API key en este orden:
+
+- **Opción A (recomendada)**: archivo en el Home Directory (fuera del webroot)
+  - Crea `~/.apifreellm_api_key` con solo la key como contenido.
+- **Opción B (fallback)**: archivo local protegido
+  - El build ya incluye `api/freellm/.apifreellm_api_key` (protegido por `.htaccess`).
+  - Si usas esta opción, asegúrate de que el archivo exista en el servidor tras subir `dist/`.
+
+#### 4) Verificar
+- El chat debe llamar a `/api/freellm/chat.php` (mismo origen, sin CORS).
+- Si falla, abre `https://tudominio.cl/api/freellm/debug.php` para diagnosticar rutas y permisos.
+
+#### Notas de seguridad
+- **No exponer `VITE_APIFREELLM_API_KEY` en producción**: las variables `VITE_*` quedan públicas en el bundle.
+- **Rotar la key si estuvo expuesta**: revoca la key anterior y genera una nueva en ApiFreeLLM.
+- El proxy PHP oculta la key del cliente y evita CORS al reenviar la request server-side.
 
 ## 📄 Licencia
 
