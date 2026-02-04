@@ -1,0 +1,8 @@
+# Denegar acceso directo a archivos sensibles
+<Files ".apifreellm_api_key">
+    Require all denied
+</Files>
+
+<Files "debug.php">
+    Require all denied
+</Files>

@@ -118,7 +118,7 @@ Los archivos de producción estarán en la carpeta `dist`.
 - **Animaciones**: Transiciones suaves con Framer Motion
 - **Impresión Optimizada**: Estilos especiales para impresión en PDF
 - **AI Chat Assistant**: Asistente virtual "El Socio" con reconocimiento de voz y síntesis de voz
-  - Integración con OpenRouter (Grok, Gemini, Llama 3, DeepSeek)
+  - Integración con ApiFreeLLM (modelo Llama 3)
   - Reconocimiento de voz en español
   - Síntesis de voz con voz masculina (Jorge)
   - Contexto de conversación persistente
@@ -127,7 +127,7 @@ Los archivos de producción estarán en la carpeta `dist`.
 ### Variables de Entorno
 Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
 ```env
-VITE_OPENROUTER_API_KEY=tu_api_key_de_openrouter
+VITE_APIFREELLM_API_KEY=tu_api_key_de_apifreellm
 ```
 
 ## 📄 Licencia
