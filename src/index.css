@@ -199,6 +199,21 @@ h6 {
   z-index: 20;
 }
 
+.cv-generator-card {
+  background-color: var(--card-glass-bg) !important;
+}
+
+.cv-generator-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #22c55e 0%, #a7f3d0 38%, #fef3c7 68%, #e9d5ff 100%);
+  z-index: 20;
+}
+
 /* Animated Gradient Text */
 .animate-gradient-text {
   background-size: 200% auto;

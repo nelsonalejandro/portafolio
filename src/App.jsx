@@ -9,6 +9,7 @@ import Experience from './components/Experience';
 import Education from './components/Education';
 import MapCard from './components/MapCard';
 import AutocreativaCard from './components/AutocreativaCard';
+import CVGeneratorCard from './components/CVGeneratorCard';
 import Contact from './components/Contact';
 import Signature from './components/Signature';
 import CombinedSkills from './components/CombinedSkills';
@@ -73,6 +74,7 @@ function App() {
               <SoftSkills />
               <Certifications />
               <AutocreativaCard />
+              <CVGeneratorCard />
               <Contact />
               <Signature theme={theme} />
             </div>

@@ -80,6 +80,61 @@ const AIChat = ({ onSpeakingChange }) => {
     const [showSettings, setShowSettings] = useState(false);
     const [error, setError] = useState('');
 
+    const slowResponseCountRef = useRef(0);
+    const upstreamFailureCountRef = useRef(0);
+    const activeRequestIdRef = useRef(0);
+    const slowTimerRef = useRef(null);
+
+    const getWeekdayEs = () => {
+        const raw = new Date().toLocaleDateString('es-ES', { weekday: 'long' }) || '';
+        return raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : 'Hoy';
+    };
+
+    const getSlowResponseMessage = (slowCount) => {
+        if (slowCount === 0) {
+            return 'Un minuto… estoy despertando 😅☕ te atiendo enseguida.';
+        }
+
+        const day = getWeekdayEs();
+        const jokes = [
+            'estoy un poco trasnochado ayudando a Nelson a pasar a producción anoche 😴👨‍💻',
+            'el servidor está “compilando ideas” y yo estoy peleando con el café ☕🧠',
+            'se fue a buscar la respuesta al stack overflow intergaláctico 🚀📚',
+            'se me quedó pegado el "npm install" mental… ya termina, lo juro 😅📦',
+            'estoy esperando que el backend deje de hacerse el misterioso… típico lunes (o cualquier día) 🕵️‍♂️🧩',
+            'el servicio está en modo ahorro de energía, le estoy tirando un wake-up a puro café ⚡☕',
+            'me quedé en un breakpoint existencial… ya le doy “continue” 🐞⏯️',
+            'estoy negociando con el servidor: yo pongo memes, él pone la respuesta 🤝😂',
+            'la respuesta viene en camino… viaja en microservicios con escala humana 🚌🧱',
+            'estoy calentando caché a mano porque hoy amaneció rebelde 🔥🗄️',
+            'el servidor está pensando en Unicode y yo tratando de no llorar 😭🔤',
+        ];
+        const joke = jokes[slowCount % jokes.length];
+        return `Hoy es ${day} y ${joke}. Dame un minutito 🙏`;
+    };
+
+    const getUpstreamFailureMessage = (failureCount) => {
+        const messages = [
+            'Aunque lo intenté 3 veces, el servidor me dejó en visto (502) 😅🔌 ¿Probamos de nuevo en un ratito?',
+            'Me pegó un Bad Gateway en la cara… reintenté 3 veces y nada 😵‍💫🚪. Dame unos minutos y volvemos a intentar.',
+            'El proxy está medio existencial hoy: se quedó sin respuesta y con timeout 🕳️⏳. Lo intenté 3 veces, ¿me escribes otra vez en un rato? ☕',
+            'No es por no entenderte… es que el gateway está de vacaciones 🏖️😂. Reintenté 3 veces y no pude traerte la respuesta.',
+            'Por más que traté de entenderte, el backend dijo “no hablo con humanos” (502) 🤖🚫. Ya reintenté 3 veces; mejor probemos más tarde 🙏',
+            'Se me cayó el puente hacia la API (Bad Gateway) 🌉💥. Lo intenté 3 veces y sigo sin poder responderte, perdón 😅',
+            'Timeout de 30s y yo con toda la fe… 🫠⏳. Reintenté 3 veces y no salió. ¿Volvemos a intentar en un ratito?',
+            'Estoy tratando de contestarte, pero el servidor está jugando al escondite (502) 🙈🧩. Reintenté 3 veces y nada.',
+            'El servicio está con sueño profundo y no despierta ni con café ☕😴. Por más que insistí, reintenté 3 veces; mejor intenta de nuevo en unos minutos.',
+            'Me quedé sin puente al upstream: puro timeout y 502 🧱⛔. Ya reintenté 3 veces; volvamos a intentarlo más tarde 🙏',
+        ];
+        return messages[failureCount % messages.length];
+    };
+
+    useEffect(() => {
+        return () => {
+            if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
+        };
+    }, []);
+
     // Notify parent of speaking state
     useEffect(() => {
         onSpeakingChange?.(isSpeaking);
@@ -129,6 +184,7 @@ const AIChat = ({ onSpeakingChange }) => {
     const buildPrompt = (messageList) => {
         const conversationHistory = messageList
             .slice(1) // Saltar mensaje de bienvenida inicial
+            .filter(msg => !msg?.meta)
             .slice(-10)
             .map(msg => `${msg.role.toUpperCase()}:\n${msg.content}`);
 
@@ -150,53 +206,167 @@ const AIChat = ({ onSpeakingChange }) => {
             return;
         }
 
-        const newMessages = [...messages, { role: 'user', content: userMessage }];
-        setMessages(newMessages);
+        const requestId = activeRequestIdRef.current + 1;
+        activeRequestIdRef.current = requestId;
+
+        const messagesForPrompt = [...messages, { role: 'user', content: userMessage }];
+        setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
         setTranscript('');
         setIsProcessing(true);
         setError('');
 
+        if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
+        slowTimerRef.current = setTimeout(() => {
+            if (activeRequestIdRef.current !== requestId) return;
+            const slowCount = slowResponseCountRef.current;
+            slowResponseCountRef.current = slowCount + 1;
+            const slowMsg = getSlowResponseMessage(slowCount);
+            setMessages(prev => [...prev, { role: 'assistant', content: slowMsg, meta: true }]);
+        }, 5000);
+
         try {
-            const prompt = buildPrompt(newMessages);
+            const prompt = buildPrompt(messagesForPrompt);
+
+            const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+            const isUpstreamIssue = (status, raw) => {
+                const msg = String(raw || '').toLowerCase();
+                return status === 502 || status === 503 || status === 504 ||
+                    msg.includes('bad gateway') ||
+                    msg.includes('upstream fetch failed') ||
+                    msg.includes('operation timed out') ||
+                    msg.includes('timed out') ||
+                    msg.includes('timeout') ||
+                    msg.includes('gateway');
+            };
 
             const headers = {
                 'Content-Type': 'application/json',
                 ...(apiKey && !usesPhpProxy ? { 'Authorization': `Bearer ${apiKey}` } : {}),
             };
 
-            const response = await fetch(APIFREELLM_ENDPOINT, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify({
-                    message: prompt,
-                }),
-            });
+            const MAX_ATTEMPTS = 3;
+            for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+                try {
+                    const response = await fetch(APIFREELLM_ENDPOINT, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({
+                            message: prompt,
+                        }),
+                    });
 
-            if (!response.ok) {
-                const text = await response.text().catch(() => '');
-                if (response.status === 401) {
-                    throw new Error('API key de ApiFreeLLM inválida o revocada (401).');
+                    if (!response.ok) {
+                        const text = await response.text().catch(() => '');
+
+                        if (response.status === 401) {
+                            throw new Error('API key de ApiFreeLLM inválida o revocada (401).');
+                        }
+                        if (response.status === 429) {
+                            const rateLimitMsg = 'Hoy ya no trabajo más 😵‍💫☕ Me quedé sin posibilidades de contestarte. (Solo utilizo servicios gratuitos, así que me limito a cierta cantidad de solicitudes al día) Vuelve más tarde 🙏';
+                            setMessages(prev => [...prev, { role: 'assistant', content: rateLimitMsg, meta: true }]);
+                            speak(rateLimitMsg);
+                            return;
+                        }
+
+                        if (attempt < MAX_ATTEMPTS && isUpstreamIssue(response.status, text)) {
+                            await sleep(600 * attempt);
+                            continue;
+                        }
+
+                        if (isUpstreamIssue(response.status, text)) {
+                            const failureCount = upstreamFailureCountRef.current;
+                            upstreamFailureCountRef.current = failureCount + 1;
+                            const msg = getUpstreamFailureMessage(failureCount);
+                            setError('');
+                            setMessages(prev => [...prev, { role: 'assistant', content: msg, meta: true }]);
+                            speak(msg);
+                            return;
+                        }
+
+                        throw new Error(`Error de ApiFreeLLM (${response.status}): ${text || 'sin detalles'}`);
+                    }
+
+                    let data;
+                    try {
+                        data = await response.json();
+                    } catch (jsonErr) {
+                        if (attempt < MAX_ATTEMPTS) {
+                            await sleep(600 * attempt);
+                            continue;
+                        }
+                        throw jsonErr;
+                    }
+
+                    if (!data?.success) {
+                        const rawApiMsg = String(data?.error || data?.message || '').toLowerCase();
+                        const looksLikeRateLimit =
+                            rawApiMsg.includes('rate') && rawApiMsg.includes('limit') ||
+                            rawApiMsg.includes('too many') ||
+                            rawApiMsg.includes('429') ||
+                            rawApiMsg.includes('límite') && (rawApiMsg.includes('solic') || rawApiMsg.includes('petic'));
+
+                        if (looksLikeRateLimit) {
+                            const rateLimitMsg = 'Hoy ya no trabajo más 😵‍💫☕ Me quedé sin posibilidades de contestarte. (Solo utilizo servicios gratuitos, así que me limito a cierta cantidad de solicitudes al día) Vuelve más tarde 🙏';
+                            setMessages(prev => [...prev, { role: 'assistant', content: rateLimitMsg, meta: true }]);
+                            speak(rateLimitMsg);
+                            return;
+                        }
+
+                        if (attempt < MAX_ATTEMPTS && isUpstreamIssue(response.status, rawApiMsg)) {
+                            await sleep(600 * attempt);
+                            continue;
+                        }
+
+                        if (isUpstreamIssue(response.status, rawApiMsg)) {
+                            const failureCount = upstreamFailureCountRef.current;
+                            upstreamFailureCountRef.current = failureCount + 1;
+                            const msg = getUpstreamFailureMessage(failureCount);
+                            setError('');
+                            setMessages(prev => [...prev, { role: 'assistant', content: msg, meta: true }]);
+                            speak(msg);
+                            return;
+                        }
+
+                        const safeMsg = data?.error || data?.message;
+                        throw new Error(safeMsg ? String(safeMsg) : 'Respuesta inválida de ApiFreeLLM.');
+                    }
+
+                    const aiMessage = data.response || '';
+                    setMessages(prev => [...prev, { role: 'assistant', content: aiMessage }]);
+                    speak(aiMessage);
+                    return;
+
+                } catch (attemptErr) {
+                    const rawAttemptMsg = String(attemptErr?.message || attemptErr || '');
+                    const retryable = isUpstreamIssue(0, rawAttemptMsg) || rawAttemptMsg.toLowerCase().includes('failed to fetch');
+
+                    if (attempt < MAX_ATTEMPTS && retryable) {
+                        await sleep(600 * attempt);
+                        continue;
+                    }
+
+                    if (retryable) {
+                        const failureCount = upstreamFailureCountRef.current;
+                        upstreamFailureCountRef.current = failureCount + 1;
+                        const msg = getUpstreamFailureMessage(failureCount);
+                        setError('');
+                        setMessages(prev => [...prev, { role: 'assistant', content: msg, meta: true }]);
+                        speak(msg);
+                        return;
+                    }
+
+                    throw attemptErr;
                 }
-                if (response.status === 429) {
-                    throw new Error('Límite de peticiones alcanzado en ApiFreeLLM (429). Intenta nuevamente en unos segundos.');
-                }
-                throw new Error(`Error de ApiFreeLLM (${response.status}): ${text || 'sin detalles'}`);
             }
-
-            const data = await response.json();
-            if (!data?.success) {
-                throw new Error('Respuesta inválida de ApiFreeLLM.');
-            }
-
-            const aiMessage = data.response || '';
-
-            setMessages([...newMessages, { role: 'assistant', content: aiMessage }]);
-            speak(aiMessage);
 
         } catch (err) {
             console.error(err);
             setError(`Error: ${err.message}`);
         } finally {
+            if (slowTimerRef.current) {
+                clearTimeout(slowTimerRef.current);
+                slowTimerRef.current = null;
+            }
             setIsProcessing(false);
         }
     }, [apiKey, messages, selectedModel, speak]);

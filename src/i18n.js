@@ -205,6 +205,15 @@ const resources = {
                 feature3: "Capacitaciones Online",
                 cta: "Visitar"
             },
+            cvGenerator: {
+                title: "CV MAGIC",
+                description: "Herramienta de creacion de curriculum vitae, es una plataforma para armar tu currículum de manera gratuita, la cual te permite capturar información desde fotos usando la cámara de tu equipo, además de importar y exportar datos desde PDFs e imágenes. Gratis y sin cuenta.",
+                badge: "v1 Beta",
+                feature1: "Asistente con IA para crear tu primer currículum",
+                feature2: "Lectura de datos desde la cámara + subida de PDF e imágenes",
+                feature3: "Servicio gratuito, sin cuenta de usuario",
+                cta: "Probar"
+            },
             signature: {
                 title: "Mi Filosofía",
                 intro: "Trabajo bajo una filosofía que me ha permitido entregar proyectos sólidos, eficientes y con un toque único: <strong>Trabajo Remoto y Vibe Coding</strong>.",
@@ -423,24 +432,33 @@ const resources = {
                 title: "Autocreativa",
                 description: "I invite you to visit my initiative: We are a digital products agency developing customized solutions with AI, automations, and cutting-edge technology to take your business to the next level.",
                 feature1: "Digital Products",
-                feature2: "AI-Powered Development",
+                feature2: "AI Development",
                 feature3: "Online Training",
                 cta: "Visit"
             },
+            cvGenerator: {
+                title: "CV MAGIC",
+                description: "An AI-powered CV builder: it guides you to create your resume and can capture information from photos using your device camera, plus import data from PDFs and images. Free and no account required.",
+                badge: "MVP in progress",
+                feature1: "AI assistant to create your first resume",
+                feature2: "Camera data capture + PDF and image upload",
+                feature3: "Free service, no user account",
+                cta: "Try it"
+            },
             signature: {
                 title: "My Philosophy",
-                intro: "I work under a philosophy that allows me to deliver solid, efficient projects with a unique touch: <strong>Remote Work and Vibe Coding</strong>.",
+                intro: "I work under a philosophy that has allowed me to deliver solid, efficient projects with a unique touch: <strong>Remote Work and Vibe Coding</strong>.",
                 remote: {
                     title: "🌍 <strong>Remote Work</strong>",
-                    desc: "No matter where you are, I can develop, optimize, and deliver solutions without geographical limits. This gives me the flexibility to work strategically, maintaining a constant flow and agile communication so that everything moves forward without friction."
+                    desc: "No matter where you are, I can develop, optimize, and deliver solutions without geographical limits. This gives me the flexibility to work strategically, maintaining a constant flow and agile communication so everything moves forward smoothly."
                 },
                 vibe: {
                     title: "💻 <strong>Vibe Coding</strong>",
-                    desc: "For me, programming is more than writing lines of code: it's an atmosphere, an energy. My kit includes Cursor to accelerate development with AI, VS Code, and the Jetbrains suite to customize every project, and yes... a good cup of coffee and lo-fi music that accompany me even in the late hours of inspiration. The result: clean, scalable code designed to last."
+                    desc: "For me, coding is more than writing lines of code: it’s an atmosphere, an energy. My kit includes Cursor to speed up development with AI, VS Code, and the JetBrains suite to customize every project — and yes… a good cup of coffee and lo-fi music that keeps me going through late nights. The result: clean, scalable code built to last."
                 },
                 promise: {
                     title: "✨ <strong>My Promise</strong>",
-                    desc: "I treat every project as if it were my own: taking care of details, optimizing resources, and ensuring the result not only complies but impresses. No excuses here, only commitment and results."
+                    desc: "I treat every project as if it were my own: taking care of details, optimizing resources, and ensuring the result not only meets expectations but impresses. No excuses — only commitment and results."
                 },
                 copyleft: "© Copyleft Nelson Ramos",
                 location: "Talca, VII Maule Region, Chile"
