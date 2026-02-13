@@ -571,6 +571,18 @@ const AIChat = ({ onSpeakingChange }) => {
                             </div>
                         </div>
 
+                        {/* WhatsApp Button */}
+                        <div className="px-4 pt-3 pb-2">
+                            <a
+                                href="https://wa.me/56985917608?text=Hola%20Nelson%2C%20me%20gustaría%20agendar%20una%20reunión"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block w-full bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white py-2.5 rounded-xl text-sm font-bold hover:shadow-[0_0_20px_rgba(37,211,102,0.5)] transition-all text-center"
+                            >
+                                📱 Ir a WhatsApp para agendar reunión
+                            </a>
+                        </div>
+
                         {/* Settings panel */}
                         {showSettings && (
                             <div className="p-4 border-b border-white/10 bg-black/30 space-y-4">
