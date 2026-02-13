@@ -215,14 +215,17 @@ const AIChat = ({ onSpeakingChange }) => {
         setIsProcessing(true);
         setError('');
 
+        // Clear any existing slow response timer
         if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
+
+        // Only show slow response message if request takes more than 10 seconds
         slowTimerRef.current = setTimeout(() => {
             if (activeRequestIdRef.current !== requestId) return;
             const slowCount = slowResponseCountRef.current;
             slowResponseCountRef.current = slowCount + 1;
             const slowMsg = getSlowResponseMessage(slowCount);
             setMessages(prev => [...prev, { role: 'assistant', content: slowMsg, meta: true }]);
-        }, 5000);
+        }, 10000);
 
         try {
             const prompt = buildPrompt(messagesForPrompt);
@@ -245,8 +248,12 @@ const AIChat = ({ onSpeakingChange }) => {
             };
 
             const MAX_ATTEMPTS = 3;
+            const RETRY_DELAY_MS = 10000; // 10 seconds between retries
+
             for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
                 try {
+                    console.log(`[FreeLLM] Intento ${attempt}/${MAX_ATTEMPTS} - Enviando solicitud...`);
+
                     const response = await fetch(APIFREELLM_ENDPOINT, {
                         method: 'POST',
                         headers,
@@ -255,25 +262,43 @@ const AIChat = ({ onSpeakingChange }) => {
                         }),
                     });
 
+                    console.log(`[FreeLLM] Intento ${attempt}/${MAX_ATTEMPTS} - Status: ${response.status}`);
+
                     if (!response.ok) {
                         const text = await response.text().catch(() => '');
 
                         if (response.status === 401) {
+                            console.error('[FreeLLM] Error 401: API key inválida');
                             throw new Error('API key de ApiFreeLLM inválida o revocada (401).');
                         }
+
+                        // Handle 429 (Too Many Requests) with retry logic
                         if (response.status === 429) {
-                            const rateLimitMsg = 'Hoy ya no trabajo más 😵‍💫☕ Me quedé sin posibilidades de contestarte. (Solo utilizo servicios gratuitos, así que me limito a cierta cantidad de solicitudes al día) Vuelve más tarde 🙏';
-                            setMessages(prev => [...prev, { role: 'assistant', content: rateLimitMsg, meta: true }]);
-                            speak(rateLimitMsg);
-                            return;
+                            console.warn(`[FreeLLM] Error 429: Límite de solicitudes alcanzado (Intento ${attempt}/${MAX_ATTEMPTS})`);
+
+                            if (attempt < MAX_ATTEMPTS) {
+                                console.log(`[FreeLLM] Reintentando en ${RETRY_DELAY_MS}ms...`);
+                                await sleep(RETRY_DELAY_MS);
+                                continue; // Retry
+                            } else {
+                                // After 3 attempts, show the rate limit message
+                                console.error('[FreeLLM] Error 429: Máximo de reintentos alcanzado');
+                                const rateLimitMsg = 'Hoy ya no trabajo más 😵‍💫☕ Me quedé sin posibilidades de contestarte. (Solo utilizo servicios gratuitos, así que me limito a cierta cantidad de solicitudes al día) Vuelve más tarde 🙏';
+                                setMessages(prev => [...prev, { role: 'assistant', content: rateLimitMsg, meta: true }]);
+                                speak(rateLimitMsg);
+                                return;
+                            }
                         }
 
                         if (attempt < MAX_ATTEMPTS && isUpstreamIssue(response.status, text)) {
+                            console.warn(`[FreeLLM] Error upstream (${response.status}): ${text.substring(0, 100)}`);
+                            console.log(`[FreeLLM] Reintentando en ${600 * attempt}ms...`);
                             await sleep(600 * attempt);
                             continue;
                         }
 
                         if (isUpstreamIssue(response.status, text)) {
+                            console.error(`[FreeLLM] Error upstream después de ${MAX_ATTEMPTS} intentos`);
                             const failureCount = upstreamFailureCountRef.current;
                             upstreamFailureCountRef.current = failureCount + 1;
                             const msg = getUpstreamFailureMessage(failureCount);
@@ -283,14 +308,18 @@ const AIChat = ({ onSpeakingChange }) => {
                             return;
                         }
 
+                        console.error(`[FreeLLM] Error ${response.status}: ${text}`);
                         throw new Error(`Error de ApiFreeLLM (${response.status}): ${text || 'sin detalles'}`);
                     }
 
                     let data;
                     try {
                         data = await response.json();
+                        console.log('[FreeLLM] Respuesta recibida exitosamente');
                     } catch (jsonErr) {
+                        console.error(`[FreeLLM] Error al parsear JSON (Intento ${attempt}/${MAX_ATTEMPTS}):`, jsonErr);
                         if (attempt < MAX_ATTEMPTS) {
+                            console.log(`[FreeLLM] Reintentando en ${600 * attempt}ms...`);
                             await sleep(600 * attempt);
                             continue;
                         }
@@ -299,6 +328,8 @@ const AIChat = ({ onSpeakingChange }) => {
 
                     if (!data?.success) {
                         const rawApiMsg = String(data?.error || data?.message || '').toLowerCase();
+                        console.warn(`[FreeLLM] Respuesta no exitosa: ${rawApiMsg}`);
+
                         const looksLikeRateLimit =
                             rawApiMsg.includes('rate') && rawApiMsg.includes('limit') ||
                             rawApiMsg.includes('too many') ||
@@ -306,18 +337,30 @@ const AIChat = ({ onSpeakingChange }) => {
                             rawApiMsg.includes('límite') && (rawApiMsg.includes('solic') || rawApiMsg.includes('petic'));
 
                         if (looksLikeRateLimit) {
-                            const rateLimitMsg = 'Hoy ya no trabajo más 😵‍💫☕ Me quedé sin posibilidades de contestarte. (Solo utilizo servicios gratuitos, así que me limito a cierta cantidad de solicitudes al día) Vuelve más tarde 🙏';
-                            setMessages(prev => [...prev, { role: 'assistant', content: rateLimitMsg, meta: true }]);
-                            speak(rateLimitMsg);
-                            return;
+                            console.warn(`[FreeLLM] Rate limit detectado en respuesta (Intento ${attempt}/${MAX_ATTEMPTS})`);
+
+                            if (attempt < MAX_ATTEMPTS) {
+                                console.log(`[FreeLLM] Reintentando en ${RETRY_DELAY_MS}ms...`);
+                                await sleep(RETRY_DELAY_MS);
+                                continue; // Retry
+                            } else {
+                                console.error('[FreeLLM] Rate limit: Máximo de reintentos alcanzado');
+                                const rateLimitMsg = 'Hoy ya no trabajo más 😵‍💫☕ Me quedé sin posibilidades de contestarte. (Solo utilizo servicios gratuitos, así que me limito a cierta cantidad de solicitudes al día) Vuelve más tarde 🙏';
+                                setMessages(prev => [...prev, { role: 'assistant', content: rateLimitMsg, meta: true }]);
+                                speak(rateLimitMsg);
+                                return;
+                            }
                         }
 
                         if (attempt < MAX_ATTEMPTS && isUpstreamIssue(response.status, rawApiMsg)) {
+                            console.warn(`[FreeLLM] Error upstream en respuesta (Intento ${attempt}/${MAX_ATTEMPTS})`);
+                            console.log(`[FreeLLM] Reintentando en ${600 * attempt}ms...`);
                             await sleep(600 * attempt);
                             continue;
                         }
 
                         if (isUpstreamIssue(response.status, rawApiMsg)) {
+                            console.error(`[FreeLLM] Error upstream después de ${MAX_ATTEMPTS} intentos`);
                             const failureCount = upstreamFailureCountRef.current;
                             upstreamFailureCountRef.current = failureCount + 1;
                             const msg = getUpstreamFailureMessage(failureCount);
@@ -331,21 +374,32 @@ const AIChat = ({ onSpeakingChange }) => {
                         throw new Error(safeMsg ? String(safeMsg) : 'Respuesta inválida de ApiFreeLLM.');
                     }
 
+                    // Success! Clear the slow response timer and show the AI response
+                    if (slowTimerRef.current) {
+                        clearTimeout(slowTimerRef.current);
+                        slowTimerRef.current = null;
+                    }
+
                     const aiMessage = data.response || '';
+                    console.log('[FreeLLM] Respuesta procesada correctamente');
                     setMessages(prev => [...prev, { role: 'assistant', content: aiMessage }]);
                     speak(aiMessage);
                     return;
 
                 } catch (attemptErr) {
                     const rawAttemptMsg = String(attemptErr?.message || attemptErr || '');
+                    console.error(`[FreeLLM] Error en intento ${attempt}/${MAX_ATTEMPTS}:`, rawAttemptMsg);
+
                     const retryable = isUpstreamIssue(0, rawAttemptMsg) || rawAttemptMsg.toLowerCase().includes('failed to fetch');
 
                     if (attempt < MAX_ATTEMPTS && retryable) {
+                        console.log(`[FreeLLM] Error recuperable, reintentando en ${600 * attempt}ms...`);
                         await sleep(600 * attempt);
                         continue;
                     }
 
                     if (retryable) {
+                        console.error(`[FreeLLM] Error recuperable después de ${MAX_ATTEMPTS} intentos`);
                         const failureCount = upstreamFailureCountRef.current;
                         upstreamFailureCountRef.current = failureCount + 1;
                         const msg = getUpstreamFailureMessage(failureCount);
@@ -360,7 +414,7 @@ const AIChat = ({ onSpeakingChange }) => {
             }
 
         } catch (err) {
-            console.error(err);
+            console.error('[FreeLLM] Error final:', err);
             setError(`Error: ${err.message}`);
         } finally {
             if (slowTimerRef.current) {
