@@ -214,6 +214,15 @@ const resources = {
                 feature3: "Servicio gratuito, sin cuenta de usuario",
                 cta: "Probar"
             },
+            aseoFacil: {
+                title: "Aseo Fácil",
+                description: "Aseo Fácil es una plataforma que simplifica la gestión de servicios de limpieza. Diseñada para ofrecer la máxima facilidad junto con IA, brindando a las empresas control y garantizando un servicio de limpieza sin tantas fricciones y transparente.",
+                badge: "v1 Beta",
+                feature1: "Conversacional app mediante asistencia de IA.",
+                feature2: "Pagos mediante transbank, aun en fase de pruebas.",
+                feature3: "Agenda de usuario e ingreso de staff de aseo.",
+                cta: "Ver Proyecto"
+            },
             signature: {
                 title: "Mi Filosofía",
                 intro: "Trabajo bajo una filosofía que me ha permitido entregar proyectos sólidos, eficientes y con un toque único: <strong>Trabajo Remoto y Vibe Coding</strong>.",
@@ -444,6 +453,15 @@ const resources = {
                 feature2: "Camera data capture + PDF and image upload",
                 feature3: "Free service, no user account",
                 cta: "Try it"
+            },
+            aseoFacil: {
+                title: "Aseo Fácil",
+                description: "Aseo Fácil is a platform that simplifies the management of cleaning services. Designed to offer maximum ease with AI, providing companies with control and guaranteeing a seamless and transparent cleaning service.",
+                badge: "v1 Beta",
+                feature1: "Conversational app with AI assistance.",
+                feature2: "Payments via Transbank, still in testing phase.",
+                feature3: "User agenda and cleaning staff check-in.",
+                cta: "View Project"
             },
             signature: {
                 title: "My Philosophy",

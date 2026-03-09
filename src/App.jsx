@@ -10,6 +10,7 @@ import Education from './components/Education';
 import MapCard from './components/MapCard';
 import AutocreativaCard from './components/AutocreativaCard';
 import CVGeneratorCard from './components/CVGeneratorCard';
+import AseoFacilCard from './components/AseoFacilCard';
 import Contact from './components/Contact';
 import Signature from './components/Signature';
 import CombinedSkills from './components/CombinedSkills';
@@ -75,6 +76,7 @@ function App() {
               <Certifications />
               <AutocreativaCard />
               <CVGeneratorCard />
+              <AseoFacilCard />
               <Contact />
               <Signature theme={theme} />
             </div>

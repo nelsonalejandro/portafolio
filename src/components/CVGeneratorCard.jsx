@@ -9,7 +9,7 @@ export default function CVGeneratorCard() {
     return (
         <section className="cv-generator-card sport-card relative overflow-hidden text-[var(--primary)] border border-green-500/20 no-print">
             <div className="absolute top-4 right-4 z-20">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-black shadow-lg shadow-amber-500/20">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-yellow-300 border border-yellow-300/50 shadow-[0_0_10px_rgba(253,224,71,0.5)]">
                     <span aria-hidden="true">🚧</span>
                     {t('cvGenerator.badge')}
                 </span>
@@ -49,6 +49,42 @@ export default function CVGeneratorCard() {
                 <p className="text-sm opacity-80 mb-5 mt-2 leading-relaxed">
                     {t('cvGenerator.description')}
                 </p>
+
+                <div className="hero-visual animate-fadeInRight animation-delay-200">
+                    <div className="hero-mockup">
+                        <div className="mockup-header">
+                            <div className="mockup-dots">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </div>
+                        <div className="mockup-content">
+                            <div className="mockup-avatar"></div>
+                            <div className="mockup-text">
+                                <div className="mockup-line w-60"></div>
+                                <div className="mockup-line w-40"></div>
+                            </div>
+                            <div className="mockup-section">
+                                <div className="mockup-line w-30"></div>
+                                <div className="mockup-line w-80"></div>
+                                <div className="mockup-line w-70"></div>
+                            </div>
+                            <div className="mockup-section">
+                                <div className="mockup-line w-30"></div>
+                                <div className="mockup-line w-90"></div>
+                                <div className="mockup-line w-60"></div>
+                            </div>
+                        </div>
+                        <div className="mockup-badge">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sparkles" aria-hidden="true">
+                                <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+                                <path d="M20 2v4" />
+                                <path d="M22 4h-4" />
+                                <circle cx="4" cy="20" r="2" />
+                            </svg>
+                            <span>IA</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className="flex flex-col gap-3 mb-6 relative z-10">

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle, Zap, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import autocreativaLogo from '../assets/autocreativa-logo.png';
 
 export default function AutocreativaCard() {
     const { t } = useTranslation();
@@ -28,6 +29,14 @@ export default function AutocreativaCard() {
                 <p className="text-sm opacity-80 mb-5 mt-2 leading-relaxed">
                     {t('autocreativa.description')}
                 </p>
+
+                <div className="w-full mb-8 rounded-xl overflow-hidden bg-transparent flex justify-center relative group">
+                    <img
+                        src={autocreativaLogo}
+                        alt="Autocreativa Shield"
+                        className="w-auto h-32 sm:h-40 object-contain transform transition-transform duration-700 group-hover:scale-110"
+                    />
+                </div>
             </div>
 
             {/* Features */}
