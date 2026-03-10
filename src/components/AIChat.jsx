@@ -561,7 +561,7 @@ const AIChat = ({ onSpeakingChange }) => {
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 bg-[#0a0a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                        className="fixed bottom-24 right-4 sm:right-6 z-50 w-[calc(100%-2rem)] sm:w-[350px] max-w-[400px] bg-[#0a0a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
                     >
                         {/* Header */}
                         <div className="p-4 border-b border-white/10 flex items-center bg-gradient-to-r from-[#7c3aed]/20 to-[#22d3ee]/20">
