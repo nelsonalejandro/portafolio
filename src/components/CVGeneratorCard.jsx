@@ -95,13 +95,13 @@ export default function CVGeneratorCard() {
                     <span className="text-sm font-medium">{t('cvGenerator.feature1')}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-500 shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-green-500/15 flex items-center justify-center text-green-500 shrink-0">
                         <Camera size={16} />
                     </div>
                     <span className="text-sm font-medium">{t('cvGenerator.feature2')}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center text-violet-500 shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-green-500/15 flex items-center justify-center text-green-500 shrink-0">
                         <LockOpen size={16} />
                     </div>
                     <span className="text-sm font-medium">{t('cvGenerator.feature3')}</span>

@@ -205,6 +205,14 @@ const resources = {
                 feature3: "Capacitaciones Online",
                 cta: "Visitar"
             },
+            book: {
+                title: "Economía de la IA",
+                description: "Te invito a leer mi libro, diseñado para ayudarte a comprender la IA desde la perspectiva de los programadores que pagamos por herramientas y ecosistemas durante nuestras sesiones de vibecoding.",
+                feature1: "Prompt Engineering para programadores",
+                feature2: "Agentes autónomos",
+                feature3: "Optimización de costos API",
+                cta: "Ver Libro"
+            },
             cvGenerator: {
                 title: "CV MAGIC",
                 description: "Herramienta de creacion de curriculum vitae, es una plataforma para armar tu currículum de manera gratuita, la cual te permite capturar información desde fotos usando la cámara de tu equipo, además de importar y exportar datos desde PDFs e imágenes. Gratis y sin cuenta.",
@@ -444,6 +452,14 @@ const resources = {
                 feature2: "AI Development",
                 feature3: "Online Training",
                 cta: "Visit"
+            },
+            book: {
+                title: "AI Economy",
+                description: "I invite you to read my book, designed to help you understand AI from the perspective of programmers who pay for tools and ecosystems during our vibe coding sessions.",
+                feature1: "Prompt Engineering for programmers",
+                feature2: "Autonomous Agents",
+                feature3: "API Cost Optimization",
+                cta: "View Book"
             },
             cvGenerator: {
                 title: "CV MAGIC",

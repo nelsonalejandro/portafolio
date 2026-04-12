@@ -218,6 +218,21 @@ h6 {
   z-index: 20;
 }
 
+.book-card {
+  background-color: var(--card-glass-bg) !important;
+}
+
+.book-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #F5C211 0%, #D4A70D 50%, #8DB8BF 100%);
+  z-index: 20;
+}
+
 .aseo-facil-card {
   background-color: #0a0a0a !important;
 }

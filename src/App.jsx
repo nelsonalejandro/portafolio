@@ -9,6 +9,7 @@ import Experience from './components/Experience';
 import Education from './components/Education';
 import MapCard from './components/MapCard';
 import AutocreativaCard from './components/AutocreativaCard';
+import BookCard from './components/BookCard';
 import CVGeneratorCard from './components/CVGeneratorCard';
 import AseoFacilCard from './components/AseoFacilCard';
 import Contact from './components/Contact';
@@ -72,13 +73,14 @@ function App() {
 
             {/* Sidebar / Stats Area */}
             <div className="lg:col-span-4 flex flex-col gap-8">
+              <Signature theme={theme} />
               <SoftSkills />
               <Certifications />
               <AutocreativaCard />
+              <BookCard />
               <CVGeneratorCard />
               <AseoFacilCard />
               <Contact />
-              <Signature theme={theme} />
             </div>
           </div>
         </div>

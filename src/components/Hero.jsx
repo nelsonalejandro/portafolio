@@ -8,6 +8,7 @@ import profileLightImg from '../assets/perfil_white.png';
 const Hero = ({ theme }) => {
     const { t } = useTranslation();
     const profileSrc = theme === 'light' ? profileLightImg : profileImg;
+    const [showModal, setShowModal] = React.useState(false);
 
     const handleImageError = (e) => {
         e.target.style.display = 'none';
@@ -16,18 +17,22 @@ const Hero = ({ theme }) => {
     };
 
     return (
-        <div className="w-full pt-12 pb-8">
+        <>
+            <div className="w-full pt-12 pb-8">
             <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-6">
 
                 {/* Profile / Welcome Section */}
                 <div className="flex items-center gap-6">
                     <div className="relative">
-                        <div className="w-24 h-24 rounded-full bg-cover bg-center border-2 border-[var(--lime-primary)] overflow-hidden bg-[var(--bg-card)]">
+                        <div 
+                            className="w-24 h-24 rounded-full bg-cover bg-center border-2 border-[var(--lime-primary)] overflow-hidden bg-[var(--bg-card)] cursor-pointer hover:scale-105 transition-transform duration-200"
+                            onClick={() => setShowModal(true)}
+                        >
                             <img
                                 src={profileSrc}
                                 alt="Profile"
                                 onError={handleImageError}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover object-bottom"
                             />
                         </div>
                         <a href="https://wa.me/56985917608" target="_blank" rel="noopener noreferrer" className="absolute bottom-0 right-0 bg-[var(--lime-primary)] text-black text-xs font-bold px-1 py-1 rounded-full border border-black flex items-center justify-center">
@@ -58,6 +63,39 @@ const Hero = ({ theme }) => {
 
             </div>
         </div>
+
+        {/* Modal for enlarged profile image */}
+        {showModal && (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                onClick={() => setShowModal(false)}
+            >
+                <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    transition={{ type: 'spring', damping: 25 }}
+                    className="relative max-w-2xl max-h-[80vh] w-full"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <img
+                        src={profileSrc}
+                        alt="Profile - Enlarged"
+                        className="w-full h-full object-contain rounded-2xl shadow-2xl"
+                    />
+                    <button
+                        onClick={() => setShowModal(false)}
+                        className="absolute -top-3 -right-3 w-10 h-10 bg-[var(--lime-primary)] rounded-full flex items-center justify-center text-black font-bold hover:scale-110 transition-transform shadow-lg"
+                    >
+                        ✕
+                    </button>
+                </motion.div>
+            </motion.div>
+        )}
+        </>
     );
 };
 
