@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import curriculumPdf from '../assets/CV_NelsonRamos.pdf';
+const curriculumPdf = '/CV_NelsonRamos.pdf';
 
 const experienceKeys = [
     { key: "entelgy", company: "Entelgy", color: "bg-cyan-500" },
