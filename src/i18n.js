@@ -42,7 +42,7 @@ const resources = {
             },
             about: {
                 title: "Sobre Mí",
-                desc: "Desarrollador full‑stack con más de 5 años de experiencia en el diseño, desarrollo e implementación de servicios RESTful y aplicaciones web escalables para los sectores financiero, minorista y de comercio electrónico.\n\nEspecializado en JavaScript/TypeScript, con experiencia en frameworks como NestJS, Express, Angular y Vue 3. Manejo de Java (Spring Boot, Spring Batch), conocimientos en Python y formación reciente en inteligencia artificial a través del Bootcamp de IA de Platzi.\n\nExperiencia en integración de pasarelas de pago, SSO (Keycloak) y desarrollo de módulos (Odoo) con Python. Herramientas como OpenAI y conocimientos en conceptos básicos de inteligencia artificial, fine-tuning de modelos, bases de datos vectoriales para embeddings y el uso de frameworks como LangChain y n8n.\n\nCompetente en principios SOLID, programación orientada a objetos y patrones de diseño, trabajando bajo metodologías ágiles como Scrum. En constante actualización, integrando IA y vibe coding en mi flujo de trabajo.",
+                desc: "Ingeniero en Informática con más de 5 años de trayectoria en el desarrollo de soluciones escalables mediante arquitecturas de microservicios y API REST. Experto en el ecosistema JavaScript (NestJS, Angular, Vue 3) y Java (Spring Boot, Spring Batch), cuenta con sólida experiencia técnica en la integración de pasarelas de pago y la modernización de sistemas legacy. Profesional enfocado en la aplicación de principios SOLID, metodologías ágiles (Scrum) e implementación de soluciones con Inteligencia Artificial.",
                 details: {
                     global: {
                         title: "Experiencia Global",
@@ -123,7 +123,7 @@ const resources = {
                     entelgy: {
                         role: "Desarrollador Full-Stack",
                         period: "Nov 2025 – Dic 2025",
-                        desc: "Migración de proyectos legacy (backend y frontend) a Spring Boot en Subtel, aplicando buenas prácticas de desarrollo establecidas por la institución y asegurando documentación completa y actualizada para mantener la trazabilidad y facilitar el mantenimiento futuro."
+                        desc: "Ejecutar la migración de proyectos legacy (Backend y Frontend) hacia Spring Boot para Subtel como consultor externo. Asegurar la trazabilidad y el mantenimiento futuro mediante documentación técnica y la aplicación de buenas prácticas institucionales durante el ciclo del proyecto."
                     },
                     junngla: {
                         role: "Desarrollador Full Stack",
@@ -133,17 +133,17 @@ const resources = {
                     indra: {
                         role: "System Engineer",
                         period: "Marzo 2022 - Octubre 2022",
-                        desc: "Creación de APIS en Backend bajo framework Java Spring Boot y consumo de procedimientos almacenados. Ingresar a servidor de archivos, extraer y transformar datos mediante el framework de Java Spring Batch. Creación de interface Frontend Angular, instalación de componentes, creación de módulos y consumo de APIS. Aplicación de conceptos y uso de herramientas de DevOps (CI/CD). Metodología de desarrollo ágil Scrum."
+                        desc: "Desarrollar APIs en el Backend utilizando Java Spring Boot y gestionar el consumo de procedimientos almacenados. Implementar procesos ETL (Extracción y Transformación) de datos mediante Java Spring Batch. Diseñar interfaces Frontend en Angular y gestionar el despliegue mediante herramientas DevOps (CI/CD) bajo metodología Scrum."
                     },
                     fusiona: {
                         role: "Desarrollador de Software",
                         period: "Octubre 2019 - Marzo 2020",
-                        desc: "Creación de set de APIS en el framework Hapi para la aplicación Gasconnect y migración de módulos a Angular 9. Backup y creación de arquitectura de bases de datos en MongoDB."
+                        desc: "Crear un set de APIs utilizando el framework Hapi para la aplicación Gasconnect. Realizar la migración de módulos críticos a Angular 9 y diseñar la arquitectura de bases de datos en MongoDB basada en réplicas."
                     },
                     bolsa: {
                         role: "Desarrollador de Software",
                         period: "Abril 2019 - Octubre 2019",
-                        desc: "Navegación automática y transformación de código html a pdf con puppeteer y AngularJS. Metodología de desarrollo ágil Scrum."
+                        desc: "Implementar herramientas para la navegación automática y transformación de código HTML a PDF utilizando Puppeteer y AngularJS."
                     },
                     escuela: {
                         role: "Ingeniero en Informática",
@@ -290,7 +290,7 @@ const resources = {
             },
             about: {
                 title: "About Me",
-                desc: "Full-stack developer with over 5 years of experience in designing, developing, and implementing RESTful services and scalable web applications for the financial, retail, and e-commerce sectors. Specialized in JavaScript/TypeScript, with experience in frameworks such as NestJS, Express, Angular, and Vue 3. Proficient in Java (Spring Boot, Spring Batch), knowledge in Python, and recent training in artificial intelligence through Platzi's AI Bootcamp. Experience integrating payment gateways, SSO (Keycloak) and building modules (Odoo) with Python. Tools like OpenAI and knowledge in basic AI concepts, model fine-tuning, vector databases for embeddings, and the use of frameworks like LangChain and n8n. Competent in SOLID principles, object-oriented programming, and design patterns, working under agile methodologies such as Scrum. Constantly improving, integrating AI and vibe coding into my workflow.",
+                desc: "Computer Engineer with more than 5 years of experience developing scalable solutions through microservices architectures and REST APIs. Expert in the JavaScript ecosystem (NestJS, Angular, Vue 3) and Java (Spring Boot, Spring Batch), with solid technical experience in payment gateway integration and legacy system modernization. Professional focused on applying SOLID principles, agile methodologies (Scrum), and implementing Artificial Intelligence solutions.",
                 details: {
                     global: {
                         title: "Global Experience",
@@ -371,7 +371,7 @@ const resources = {
                     entelgy: {
                         role: "Full-Stack Developer",
                         period: "Nov 2025 – Dec 2025",
-                        desc: "Migration of legacy projects (backend and frontend) to Spring Boot at Subtel, applying best development practices established by the institution and ensuring complete and updated documentation to maintain traceability and facilitate future maintenance."
+                        desc: "Execute the migration of legacy projects (Backend and Frontend) to Spring Boot for Subtel as an external consultant. Ensure traceability and future maintenance through technical documentation and the application of institutional best practices throughout the project cycle."
                     },
                     junngla: {
                         role: "Full Stack Developer",
@@ -381,17 +381,17 @@ const resources = {
                     indra: {
                         role: "System Engineer",
                         period: "March 2022 - October 2022",
-                        desc: "Creation of Backend APIs under Java Spring Boot framework and consumption of stored procedures. Access to file server, extract and transform data using Java Spring Batch framework. Creation of Angular Frontend interface, component installation, module creation and API consumption. Application of DevOps concepts and tools (CI/CD). Agile Scrum development methodology."
+                        desc: "Develop Backend APIs using Java Spring Boot and manage the consumption of stored procedures. Implement ETL (Extraction and Transformation) data processes using Java Spring Batch. Design Frontend interfaces in Angular and manage deployment using DevOps tools (CI/CD) under Scrum methodology."
                     },
                     fusiona: {
                         role: "Software Developer",
                         period: "October 2019 - March 2020",
-                        desc: "Creation of API set in Hapi framework for Gasconnect application and module migration to Angular 9. Backup and creation of database architecture in MongoDB."
+                        desc: "Create a set of APIs using the Hapi framework for the Gasconnect application. Perform the migration of critical modules to Angular 9 and design the replica-based database architecture in MongoDB."
                     },
                     bolsa: {
                         role: "Software Developer",
                         period: "April 2019 - October 2019",
-                        desc: "Automatic navigation and transformation of html code to pdf with puppeteer and AngularJS. Agile Scrum development methodology."
+                        desc: "Implement tools for automatic navigation and transformation of HTML code to PDF using Puppeteer and AngularJS."
                     },
                     escuela: {
                         role: "IT Engineer",

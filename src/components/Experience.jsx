@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import curriculumPdf from '../assets/Curriculum_NelsonRamos.pdf';
+import curriculumPdf from '../assets/CV_NelsonRamos.pdf';
 
 const experienceKeys = [
     { key: "entelgy", company: "Entelgy", color: "bg-cyan-500" },
@@ -22,7 +22,7 @@ export default function Experience() {
                 <h3 className="text-xl font-bold text-[var(--primary)] font-[var(--font-display)]">{t('experience.title')}</h3>
                 <a
                     href={curriculumPdf}
-                    target="_blank"
+                    download="CV_NelsonRamos.pdf"
                     rel="noopener noreferrer"
                     className="bg-[var(--lime-primary)] text-black px-4 py-2 rounded-xl font-bold text-xs hover:bg-opacity-80 transition-colors no-print"
                 >
