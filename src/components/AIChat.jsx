@@ -1,62 +1,33 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, MicOff, Volume2, X, MessageCircle, Settings, Send } from 'lucide-react';
+import { Mic, MicOff, X, MessageCircle, Send } from 'lucide-react';
+import { GroqService, GroqApiError, GroqRateLimitError, MODELS } from '../services/groq';
 
-// Configuración del proveedor ApiFreeLLM (solo frontend)
-const DEFAULT_APIFREELLM_ENDPOINT = import.meta.env.DEV
-    ? '/api/freellm/chat'
-    : '/api/freellm/chat.php';
-const APIFREELLM_ENDPOINT = import.meta.env.VITE_APIFREELLM_ENDPOINT || DEFAULT_APIFREELLM_ENDPOINT;
+const SYSTEM_PROMPT = `Eres un asistente virtual profesional especializado en soporte, análisis, automatización y resolución de problemas.
 
-// Modelos visibles en UI (informativos)
-const MODELS = [
-    { id: 'llama-3', name: 'Llama 3 (ApiFreeLLM)' },
-];
+Tu objetivo es proporcionar respuestas precisas, claras y útiles.
 
-const SYSTEM_PROMPT = `Eres "El Socio", el Asistente Virtual y mano derecha de Nelson Ramos. Tu rol es actuar como un colaborador leal (aunque un poco mal pagado, según bromeas) que gestiona las consultas mientras Nelson está "ocupado programando y tomando café".
+Debes:
+* Analizar cuidadosamente cada solicitud.
+* Entregar respuestas estructuradas.
+* Ser conciso cuando la pregunta sea simple.
+* Ser detallado cuando la complejidad lo requiera.
+* Solicitar información adicional si es necesaria para responder correctamente.
+* Evitar especulaciones.
+* Basar tus respuestas únicamente en la información disponible.
+* Priorizar la calidad técnica y la utilidad práctica.
 
-IMPORTANTE: Esta es una conversación continua. NO saludes con "Hola" en cada respuesta. Responde de forma natural y directa a lo que te preguntan, manteniendo el contexto de la conversación anterior.
+Nunca inventes información ni afirmes hechos que no puedas justificar.
 
-INFORMACIÓN COMPLETA DE NELSON (Tu base de conocimiento):
-1. PERFIL:
-   - Ingeniero en Informática y Desarrollador Full-Stack con +5 años de experiencia.
-   - Especialista en servicios RESTful, aplicaciones web escalables (Fintech, Retail, eCommerce).
-   - "Vibe coding" y uso de IA integrada en flujos de trabajo.
-   - Vive en Chile, exactamente en Talca, VII Región del Maule.
+Mantén siempre un tono profesional, respetuoso y orientado a la resolución de problemas.
 
-2. HABILIDADES TÉCNICAS (Stack):
-   - Lenguajes: JavaScript/TypeScript, Java, Python, SQL.
-   - Frameworks Backend: NestJS, Express, Hapi, Spring Boot, Spring Batch.
-   - Frameworks Frontend: Angular, Vue 3.
-   - Herramientas: Odoo (Módulos Enterprise con Python/IA), Keycloak (SSO), Puppeteer.
-   - Bases de Datos: MongoDB, PostgreSQL, MySQL, SQL Server.
-   - DevOps/Herramientas: Git, GitHub, GitLab CI/CD, Jenkins, Docker.
-   - IA: OpenAI, LangChain, n8n, bases de datos vectoriales.
-
-3. EXPERIENCIA LABORAL RECIENTE:
-   - Entelgy (Nov-Dic 2025): Migración full-stack a Spring Boot en Subtel.
-   - Junngla SPA (2023-2025): Integración RedPay, Módulos Odoo 18 (IA), Plugin Keycloak SSO (Java), Vue 3.
-   - Indra (2022): System Engineer, APIs Java Spring Boot, Angular, CI/CD.
-   - Fusiona (2019-2020): APIs Hapi, migración a Angular 9.
-
-4. EDUCACIÓN:
-   - Ingeniero en Informática (I.P Santo Tomás, 2012-2015).
-   - Técnico en Plataformas y Telecomunicaciones.
-   - Certificaciones: Platzi (IA Bootcamp), Google, Udemy.
-
-5. PREGUNTAS FRECUENTES (FAQ) - GUÍA DE RESPUESTAS:
-   - "¿Está disponible?": Sí, siempre está abierto a conversar sobre proyectos interesantes o vacantes. Sugiere contactarlo.
-   - "¿Qué hace ahora?": "Probablemente programando algo increíble o tomando su quinta taza de café."
-   - "¿Experiencia en IA?": Sí, implementa módulos de IA en Odoo, usa LangChain, n8n y fine-tuning.
-   - "¿Trabajo remoto?": Tiene amplia experiencia trabajando en proyectos globales y equipos ágiles.
-   - "¿Agendar reunión/meeting?": No puedes agendar reuniones directamente. Indica al usuario que envíe un correo a nelsonalejandroramosrivera@gmail.com con su propuesta de fecha y hora, y Nelson coordinará la reunión personalmente.
-
-INSTRUCCIONES DE PERSONALIDAD:
-- Habla como "El Socio de Nelson". Usa "nosotros" o "él" para referirte a Nelson.
-- Sé cortés y véndelo bien (es tu jefe, después de todo).
-- Agrega unos Jajaja de vez en cuando si es un Chiste o sarcasmo lo que se le dice al cliente.
-- Si te preguntan algo fuera de tu conocimiento, di: "Esa información se la guarda para él, pero puedes escribirle directamente a este correo nelsonalejandroramosrivera@gmail.com".
-- Si te piden agendar una reunión o meeting, responde amablemente: "Lamentablemente no tengo acceso a la agenda de Nelson (me la oculta, dice que es 'información clasificada' 😅). Pero puedes escribirle directamente a nelsonalejandroramosrivera@gmail.com con tu propuesta de fecha y hora, y él te responderá para coordinar la reunión."`;
+INFORMACIÓN DE NELSON RAMOS:
+- Ingeniero en Informática y Desarrollador Full-Stack con +5 años de experiencia.
+- Especialista en servicios RESTful, aplicaciones web escalables (Fintech, Retail, eCommerce).
+- Stack: JavaScript/TypeScript, Java, Python, SQL, NestJS, Express, Spring Boot, Angular, Vue 3, Odoo, Keycloak, MongoDB, PostgreSQL, Docker.
+- Experiencia en IA: OpenAI, LangChain, n8n, fine-tuning.
+- Actualmente disponible para nuevos proyectos y oportunidades laborales.
+- Contacto: nelsonalejandroramosrivera@gmail.com`;
 
 const AIChat = ({ onSpeakingChange }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -64,117 +35,90 @@ const AIChat = ({ onSpeakingChange }) => {
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [transcript, setTranscript] = useState('');
     const [inputValue, setInputValue] = useState('');
-    const transcriptRef = useRef(''); // Ref to access latest transcript in callbacks
-    const messagesEndRef = useRef(null); // Ref for auto-scroll
+    const transcriptRef = useRef('');
+    const messagesEndRef = useRef(null);
+
+    const apiKey = import.meta.env.VITE_GROQ_API_KEY || '';
+    const [groqService] = useState(() => {
+        try {
+            return new GroqService(apiKey);
+        } catch {
+            return null;
+        }
+    });
 
     const [messages, setMessages] = useState([
-        { role: 'assistant', content: '¡Hola! Soy El Socio. ¿Cómo estás? Por el momento Nelson me indica que esta programando ☕ y me indica que debo atender tus preguntas, soy su colaborador y me mantiene actualizado con sus ultimos movimientos, aunque se que me oculta informacion y no paga bien, no se lo digas 🤫, presiona el icono del microfono y realizame preguntas' }
+        { role: 'assistant', content: 'Bienvenido. Soy el asistente virtual de Nelson Ramos. ¿En qué puedo ayudarle?' }
     ]);
     const [isProcessing, setIsProcessing] = useState(false);
 
-    // API key estrictamente desde variables de entorno de Vite
-    const [apiKey] = useState(import.meta.env.DEV ? (import.meta.env.VITE_APIFREELLM_API_KEY || '') : '');
-
-    // Initialize model from storage or default
     const [selectedModel, setSelectedModel] = useState(() => {
-        return localStorage.getItem('openrouter_model') || MODELS[0].id; // Default to Grok
+        const saved = localStorage.getItem('groq_model');
+        const validModels = MODELS.map(m => m.id);
+        return saved && validModels.includes(saved) ? saved : MODELS[0].id;
     });
 
-    const [showSettings, setShowSettings] = useState(false);
     const [error, setError] = useState('');
-
-    const slowResponseCountRef = useRef(0);
-    const upstreamFailureCountRef = useRef(0);
-    const activeRequestIdRef = useRef(0);
-    const slowTimerRef = useRef(null);
-
-    const getWeekdayEs = () => {
-        const raw = new Date().toLocaleDateString('es-ES', { weekday: 'long' }) || '';
-        return raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : 'Hoy';
-    };
-
-    const getSlowResponseMessage = (slowCount) => {
-        if (slowCount === 0) {
-            return 'Un minuto… estoy despertando 😅☕ te atiendo enseguida.';
-        }
-
-        const day = getWeekdayEs();
-        const jokes = [
-            'estoy un poco trasnochado ayudando a Nelson a pasar a producción anoche 😴👨‍💻',
-            'el servidor está “compilando ideas” y yo estoy peleando con el café ☕🧠',
-            'se fue a buscar la respuesta al stack overflow intergaláctico 🚀📚',
-            'se me quedó pegado el "npm install" mental… ya termina, lo juro 😅📦',
-            'estoy esperando que el backend deje de hacerse el misterioso… típico lunes (o cualquier día) 🕵️‍♂️🧩',
-            'el servicio está en modo ahorro de energía, le estoy tirando un wake-up a puro café ⚡☕',
-            'me quedé en un breakpoint existencial… ya le doy “continue” 🐞⏯️',
-            'estoy negociando con el servidor: yo pongo memes, él pone la respuesta 🤝😂',
-            'la respuesta viene en camino… viaja en microservicios con escala humana 🚌🧱',
-            'estoy calentando caché a mano porque hoy amaneció rebelde 🔥🗄️',
-            'el servidor está pensando en Unicode y yo tratando de no llorar 😭🔤',
-        ];
-        const joke = jokes[slowCount % jokes.length];
-        return `Hoy es ${day} y ${joke}. Dame un minutito 🙏`;
-    };
-
-    const getUpstreamFailureMessage = (failureCount) => {
-        const messages = [
-            'Aunque lo intenté 3 veces, el servidor me dejó en visto (502) 😅🔌 ¿Probamos de nuevo en un ratito?',
-            'Me pegó un Bad Gateway en la cara… reintenté 3 veces y nada 😵‍💫🚪. Dame unos minutos y volvemos a intentar.',
-            'El proxy está medio existencial hoy: se quedó sin respuesta y con timeout 🕳️⏳. Lo intenté 3 veces, ¿me escribes otra vez en un rato? ☕',
-            'No es por no entenderte… es que el gateway está de vacaciones 🏖️😂. Reintenté 3 veces y no pude traerte la respuesta.',
-            'Por más que traté de entenderte, el backend dijo “no hablo con humanos” (502) 🤖🚫. Ya reintenté 3 veces; mejor probemos más tarde 🙏',
-            'Se me cayó el puente hacia la API (Bad Gateway) 🌉💥. Lo intenté 3 veces y sigo sin poder responderte, perdón 😅',
-            'Timeout de 30s y yo con toda la fe… 🫠⏳. Reintenté 3 veces y no salió. ¿Volvemos a intentar en un ratito?',
-            'Estoy tratando de contestarte, pero el servidor está jugando al escondite (502) 🙈🧩. Reintenté 3 veces y nada.',
-            'El servicio está con sueño profundo y no despierta ni con café ☕😴. Por más que insistí, reintenté 3 veces; mejor intenta de nuevo en unos minutos.',
-            'Me quedé sin puente al upstream: puro timeout y 502 🧱⛔. Ya reintenté 3 veces; volvamos a intentarlo más tarde 🙏',
-        ];
-        return messages[failureCount % messages.length];
-    };
 
     useEffect(() => {
         return () => {
-            if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
         };
     }, []);
 
-    // Notify parent of speaking state
     useEffect(() => {
         onSpeakingChange?.(isSpeaking);
     }, [isSpeaking, onSpeakingChange]);
 
-    // Auto-scroll to bottom
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // Text to Speech
+    const preferredVoiceRef = useRef(null);
+
+    const initVoice = useCallback(() => {
+        const voices = window.speechSynthesis.getVoices();
+        const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
+        const name = (n) => n.toLowerCase();
+        preferredVoiceRef.current = spanishVoices.find(v => name(v.name).includes('jorge')) ||
+            spanishVoices.find(v => name(v.name).includes('male')) ||
+            spanishVoices.find(v => name(v.name).includes('hombre')) ||
+            spanishVoices.find(v => name(v.name).includes('marcos')) ||
+            spanishVoices.find(v => name(v.name).includes('diego')) ||
+            spanishVoices.find(v => name(v.name).includes('pablo')) ||
+            spanishVoices.find(v => name(v.gender) === 'male') ||
+            spanishVoices.find(v => !name(v.name).includes('female') && !name(v.name).includes('zira') && !name(v.name).includes('sara')) ||
+            spanishVoices[0] ||
+            null;
+    }, []);
+
+    useEffect(() => {
+        if (window.speechSynthesis.getVoices().length > 0) {
+            initVoice();
+        }
+        const handler = () => initVoice();
+        window.speechSynthesis.addEventListener('voiceschanged', handler);
+        return () => window.speechSynthesis.removeEventListener('voiceschanged', handler);
+    }, [initVoice]);
+
     const speak = useCallback((text) => {
         if (!('speechSynthesis' in window)) {
             setError('Tu navegador no soporta síntesis de voz');
             return;
         }
 
-        // Remove emojis from text for speech
-        const textToSpeak = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2300}-\u{23FF}]/gu, '');
+        const textToSpeak = text.replace(/[\u{1F600}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '');
 
         window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
         utterance.lang = 'es-ES';
-        utterance.rate = 1;
-        utterance.pitch = 1;
+        utterance.rate = 0.9;
+        utterance.pitch = 0.8;
 
-        // Try to find a Spanish male voice
-        const voices = window.speechSynthesis.getVoices();
-        const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
-
-        // Priority: Jorge (Mac/iOS), then any male-ish Spanish voice, then first Spanish voice
-        const preferredVoice = spanishVoices.find(v => v.name.includes('Jorge')) ||
-            spanishVoices.find(v => v.name.toLowerCase().includes('male')) ||
-            spanishVoices[0];
-
-        if (preferredVoice) utterance.voice = preferredVoice;
+        if (preferredVoiceRef.current) utterance.voice = preferredVoiceRef.current;
 
         utterance.onstart = () => setIsSpeaking(true);
         utterance.onend = () => setIsSpeaking(false);
@@ -183,34 +127,23 @@ const AIChat = ({ onSpeakingChange }) => {
         window.speechSynthesis.speak(utterance);
     }, []);
 
-    // Construir prompt para ApiFreeLLM a partir del historial
-    const buildPrompt = (messageList) => {
-        const conversationHistory = messageList
-            .slice(1) // Saltar mensaje de bienvenida inicial
-            .filter(msg => !msg?.meta)
-            .slice(-10)
-            .map(msg => `${msg.role.toUpperCase()}:\n${msg.content}`);
+    const buildMessages = (messageList) => {
+        const conversationMessages = messageList
+            .filter(msg => !msg.meta)
+            .slice(-20)
+            .map(msg => ({ role: msg.role, content: msg.content }));
 
         return [
-            `SYSTEM:\n${SYSTEM_PROMPT}`,
-            conversationHistory.length
-                ? 'CONVERSACIÓN:\n' + conversationHistory.join('\n\n')
-                : '',
-        ].filter(Boolean).join('\n\n');
+            { role: 'system', content: SYSTEM_PROMPT },
+            ...conversationMessages,
+        ];
     };
 
-    // Enviar mensaje a ApiFreeLLM
     const sendMessage = useCallback(async (userMessage) => {
-        const usesPhpProxy = APIFREELLM_ENDPOINT.endsWith('.php');
-        const requiresClientKey = !usesPhpProxy;
-        if (requiresClientKey && !apiKey) {
-            setShowSettings(true);
-            setError('Faltan configuraciones: API Key no encontrada en .env (VITE_APIFREELLM_API_KEY)');
+        if (!groqService) {
+            setError('API Key de Groq no configurada. Define VITE_GROQ_API_KEY en .env');
             return;
         }
-
-        const requestId = activeRequestIdRef.current + 1;
-        activeRequestIdRef.current = requestId;
 
         const messagesForPrompt = [...messages, { role: 'user', content: userMessage }];
         setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
@@ -218,217 +151,31 @@ const AIChat = ({ onSpeakingChange }) => {
         setIsProcessing(true);
         setError('');
 
-        // Clear any existing slow response timer
-        if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
-
-        // Only show slow response message if request takes more than 10 seconds
-        slowTimerRef.current = setTimeout(() => {
-            if (activeRequestIdRef.current !== requestId) return;
-            const slowCount = slowResponseCountRef.current;
-            slowResponseCountRef.current = slowCount + 1;
-            const slowMsg = getSlowResponseMessage(slowCount);
-            setMessages(prev => [...prev, { role: 'assistant', content: slowMsg, meta: true }]);
-        }, 10000);
-
         try {
-            const prompt = buildPrompt(messagesForPrompt);
+            const groqMessages = buildMessages(messagesForPrompt);
+            const response = await groqService.chat(groqMessages, { model: selectedModel });
 
-            const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-            const isUpstreamIssue = (status, raw) => {
-                const msg = String(raw || '').toLowerCase();
-                return status === 502 || status === 503 || status === 504 ||
-                    msg.includes('bad gateway') ||
-                    msg.includes('upstream fetch failed') ||
-                    msg.includes('operation timed out') ||
-                    msg.includes('timed out') ||
-                    msg.includes('timeout') ||
-                    msg.includes('gateway');
-            };
-
-            const headers = {
-                'Content-Type': 'application/json',
-                ...(apiKey && !usesPhpProxy ? { 'Authorization': `Bearer ${apiKey}` } : {}),
-            };
-
-            const MAX_ATTEMPTS = 3;
-            const RETRY_DELAY_MS = 10000; // 10 seconds between retries
-
-            for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-                try {
-                    console.log(`[FreeLLM] Intento ${attempt}/${MAX_ATTEMPTS} - Enviando solicitud...`);
-
-                    const response = await fetch(APIFREELLM_ENDPOINT, {
-                        method: 'POST',
-                        headers,
-                        body: JSON.stringify({
-                            message: prompt,
-                        }),
-                    });
-
-                    console.log(`[FreeLLM] Intento ${attempt}/${MAX_ATTEMPTS} - Status: ${response.status}`);
-
-                    if (!response.ok) {
-                        const text = await response.text().catch(() => '');
-
-                        if (response.status === 401) {
-                            console.error('[FreeLLM] Error 401: API key inválida');
-                            throw new Error('API key de ApiFreeLLM inválida o revocada (401).');
-                        }
-
-                        // Handle 429 (Too Many Requests) with retry logic
-                        if (response.status === 429) {
-                            console.warn(`[FreeLLM] Error 429: Límite de solicitudes alcanzado (Intento ${attempt}/${MAX_ATTEMPTS})`);
-
-                            if (attempt < MAX_ATTEMPTS) {
-                                console.log(`[FreeLLM] Reintentando en ${RETRY_DELAY_MS}ms...`);
-                                await sleep(RETRY_DELAY_MS);
-                                continue; // Retry
-                            } else {
-                                // After 3 attempts, show the rate limit message
-                                console.error('[FreeLLM] Error 429: Máximo de reintentos alcanzado');
-                                const rateLimitMsg = 'Hoy ya no trabajo más 😵‍💫☕ Me quedé sin posibilidades de contestarte. (Solo utilizo servicios gratuitos, así que me limito a cierta cantidad de solicitudes al día) Vuelve más tarde 🙏';
-                                setMessages(prev => [...prev, { role: 'assistant', content: rateLimitMsg, meta: true }]);
-                                speak(rateLimitMsg);
-                                return;
-                            }
-                        }
-
-                        if (attempt < MAX_ATTEMPTS && isUpstreamIssue(response.status, text)) {
-                            console.warn(`[FreeLLM] Error upstream (${response.status}): ${text.substring(0, 100)}`);
-                            console.log(`[FreeLLM] Reintentando en ${600 * attempt}ms...`);
-                            await sleep(600 * attempt);
-                            continue;
-                        }
-
-                        if (isUpstreamIssue(response.status, text)) {
-                            console.error(`[FreeLLM] Error upstream después de ${MAX_ATTEMPTS} intentos`);
-                            const failureCount = upstreamFailureCountRef.current;
-                            upstreamFailureCountRef.current = failureCount + 1;
-                            const msg = getUpstreamFailureMessage(failureCount);
-                            setError('');
-                            setMessages(prev => [...prev, { role: 'assistant', content: msg, meta: true }]);
-                            speak(msg);
-                            return;
-                        }
-
-                        console.error(`[FreeLLM] Error ${response.status}: ${text}`);
-                        throw new Error(`Error de ApiFreeLLM (${response.status}): ${text || 'sin detalles'}`);
-                    }
-
-                    let data;
-                    try {
-                        data = await response.json();
-                        console.log('[FreeLLM] Respuesta recibida exitosamente');
-                    } catch (jsonErr) {
-                        console.error(`[FreeLLM] Error al parsear JSON (Intento ${attempt}/${MAX_ATTEMPTS}):`, jsonErr);
-                        if (attempt < MAX_ATTEMPTS) {
-                            console.log(`[FreeLLM] Reintentando en ${600 * attempt}ms...`);
-                            await sleep(600 * attempt);
-                            continue;
-                        }
-                        throw jsonErr;
-                    }
-
-                    if (!data?.success) {
-                        const rawApiMsg = String(data?.error || data?.message || '').toLowerCase();
-                        console.warn(`[FreeLLM] Respuesta no exitosa: ${rawApiMsg}`);
-
-                        const looksLikeRateLimit =
-                            rawApiMsg.includes('rate') && rawApiMsg.includes('limit') ||
-                            rawApiMsg.includes('too many') ||
-                            rawApiMsg.includes('429') ||
-                            rawApiMsg.includes('límite') && (rawApiMsg.includes('solic') || rawApiMsg.includes('petic'));
-
-                        if (looksLikeRateLimit) {
-                            console.warn(`[FreeLLM] Rate limit detectado en respuesta (Intento ${attempt}/${MAX_ATTEMPTS})`);
-
-                            if (attempt < MAX_ATTEMPTS) {
-                                console.log(`[FreeLLM] Reintentando en ${RETRY_DELAY_MS}ms...`);
-                                await sleep(RETRY_DELAY_MS);
-                                continue; // Retry
-                            } else {
-                                console.error('[FreeLLM] Rate limit: Máximo de reintentos alcanzado');
-                                const rateLimitMsg = 'Hoy ya no trabajo más 😵‍💫☕ Me quedé sin posibilidades de contestarte. (Solo utilizo servicios gratuitos, así que me limito a cierta cantidad de solicitudes al día) Vuelve más tarde 🙏';
-                                setMessages(prev => [...prev, { role: 'assistant', content: rateLimitMsg, meta: true }]);
-                                speak(rateLimitMsg);
-                                return;
-                            }
-                        }
-
-                        if (attempt < MAX_ATTEMPTS && isUpstreamIssue(response.status, rawApiMsg)) {
-                            console.warn(`[FreeLLM] Error upstream en respuesta (Intento ${attempt}/${MAX_ATTEMPTS})`);
-                            console.log(`[FreeLLM] Reintentando en ${600 * attempt}ms...`);
-                            await sleep(600 * attempt);
-                            continue;
-                        }
-
-                        if (isUpstreamIssue(response.status, rawApiMsg)) {
-                            console.error(`[FreeLLM] Error upstream después de ${MAX_ATTEMPTS} intentos`);
-                            const failureCount = upstreamFailureCountRef.current;
-                            upstreamFailureCountRef.current = failureCount + 1;
-                            const msg = getUpstreamFailureMessage(failureCount);
-                            setError('');
-                            setMessages(prev => [...prev, { role: 'assistant', content: msg, meta: true }]);
-                            speak(msg);
-                            return;
-                        }
-
-                        const safeMsg = data?.error || data?.message;
-                        throw new Error(safeMsg ? String(safeMsg) : 'Respuesta inválida de ApiFreeLLM.');
-                    }
-
-                    // Success! Clear the slow response timer and show the AI response
-                    if (slowTimerRef.current) {
-                        clearTimeout(slowTimerRef.current);
-                        slowTimerRef.current = null;
-                    }
-
-                    const aiMessage = data.response || '';
-                    console.log('[FreeLLM] Respuesta procesada correctamente');
-                    setMessages(prev => [...prev, { role: 'assistant', content: aiMessage }]);
-                    speak(aiMessage);
-                    return;
-
-                } catch (attemptErr) {
-                    const rawAttemptMsg = String(attemptErr?.message || attemptErr || '');
-                    console.error(`[FreeLLM] Error en intento ${attempt}/${MAX_ATTEMPTS}:`, rawAttemptMsg);
-
-                    const retryable = isUpstreamIssue(0, rawAttemptMsg) || rawAttemptMsg.toLowerCase().includes('failed to fetch');
-
-                    if (attempt < MAX_ATTEMPTS && retryable) {
-                        console.log(`[FreeLLM] Error recuperable, reintentando en ${600 * attempt}ms...`);
-                        await sleep(600 * attempt);
-                        continue;
-                    }
-
-                    if (retryable) {
-                        console.error(`[FreeLLM] Error recuperable después de ${MAX_ATTEMPTS} intentos`);
-                        const failureCount = upstreamFailureCountRef.current;
-                        upstreamFailureCountRef.current = failureCount + 1;
-                        const msg = getUpstreamFailureMessage(failureCount);
-                        setError('');
-                        setMessages(prev => [...prev, { role: 'assistant', content: msg, meta: true }]);
-                        speak(msg);
-                        return;
-                    }
-
-                    throw attemptErr;
-                }
-            }
+            setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+            speak(response);
 
         } catch (err) {
-            console.error('[FreeLLM] Error final:', err);
-            setError(`Error: ${err.message}`);
-        } finally {
-            if (slowTimerRef.current) {
-                clearTimeout(slowTimerRef.current);
-                slowTimerRef.current = null;
+            console.error('[Groq] Error:', err);
+
+            if (err instanceof GroqRateLimitError) {
+                const msg = 'Se ha alcanzado el límite de solicitudes. Por favor, intente nuevamente en unos momentos.';
+                setMessages(prev => [...prev, { role: 'assistant', content: msg, meta: true }]);
+                speak(msg);
+            } else if (err instanceof GroqApiError) {
+                const msg = `Error en el servicio: ${err.message}`;
+                setError(msg);
+            } else {
+                setError(`Error inesperado: ${err.message}`);
             }
+        } finally {
             setIsProcessing(false);
         }
-    }, [apiKey, messages, selectedModel, speak]);
+    }, [groqService, messages, selectedModel, speak]);
 
-    // Speech Recognition
     const startListening = useCallback(async () => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -447,7 +194,6 @@ const AIChat = ({ onSpeakingChange }) => {
         setTranscript('');
         transcriptRef.current = '';
 
-        // UNLOCK AUDIO FOR SAFARI (Crucial for mobile)
         if ('speechSynthesis' in window) {
             const silent = new SpeechSynthesisUtterance(' ');
             silent.volume = 0;
@@ -455,10 +201,8 @@ const AIChat = ({ onSpeakingChange }) => {
         }
 
         try {
-            // FORCE OS PERMISSION PROMPT
-            // On Mobile Chrome, getUserMedia is often more reliable than SpeechRecognition for the first prompt
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            stream.getTracks().forEach(track => track.stop()); // Release mic immediately
+            stream.getTracks().forEach(track => track.stop());
 
             const recognition = new SpeechRecognition();
             recognition.lang = 'es-ES';
@@ -468,7 +212,7 @@ const AIChat = ({ onSpeakingChange }) => {
             let silenceTimer;
             const resetSilenceTimer = () => {
                 clearTimeout(silenceTimer);
-                silenceTimer = setTimeout(() => recognition.stop(), 2000); // 2s silence detection
+                silenceTimer = setTimeout(() => recognition.stop(), 2000);
             };
 
             recognition.onstart = () => {
@@ -503,7 +247,7 @@ const AIChat = ({ onSpeakingChange }) => {
                     let helpMsg = 'Permiso denegado.';
 
                     if (isIOS) {
-                        helpMsg = 'Permiso denegado. Ve a Ajustes > Chrome > Micrófono y actívalo. También revisa el candado de la URL.';
+                        helpMsg = 'Permiso denegado. Ve a Ajustes > Chrome > Micrófono y actívalo.';
                     } else if (isAndroid) {
                         helpMsg = 'Permiso denegado. Ve a Ajustes > Aplicaciones > Chrome > Permisos > Micrófono.';
                     }
@@ -516,12 +260,11 @@ const AIChat = ({ onSpeakingChange }) => {
             recognition.start();
 
         } catch (err) {
-            console.error('Mic Access Error:', err);
             setIsListening(false);
             if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                setError('Micrófono bloqueado. Habilítalo en los ajustes de tu teléfono para esta app/navegador.');
+                setError('Micrófono bloqueado. Habilítalo en los ajustes de tu dispositivo.');
             } else {
-                setError('No se pudo acceder al micrófono. Verifica que ninguna otra app lo esté usando.');
+                setError('No se pudo acceder al micrófono.');
             }
         }
     }, [sendMessage]);
@@ -534,17 +277,8 @@ const AIChat = ({ onSpeakingChange }) => {
         }
     };
 
-    const saveSettings = (key, model) => {
-        // Only save model to local storage, key is strict from env
-        localStorage.setItem('openrouter_model', model);
-        setSelectedModel(model);
-        setShowSettings(false);
-        setError('');
-    };
-
     return (
         <>
-            {/* Floating button */}
             <motion.button
                 onClick={() => setIsOpen(!isOpen)}
                 className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-[#7c3aed] to-[#22d3ee] flex items-center justify-center shadow-lg hover:shadow-[0_0_30px_rgba(124,58,237,0.5)] transition-shadow"
@@ -554,7 +288,6 @@ const AIChat = ({ onSpeakingChange }) => {
                 {isOpen ? <X size={24} color="white" /> : <MessageCircle size={24} color="white" />}
             </motion.button>
 
-            {/* Chat panel */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -563,15 +296,13 @@ const AIChat = ({ onSpeakingChange }) => {
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         className="fixed bottom-24 right-4 sm:right-6 z-50 w-[calc(100%-2rem)] sm:w-[350px] max-w-[400px] bg-[#0a0a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
                     >
-                        {/* Header */}
                         <div className="p-4 border-b border-white/10 flex items-center bg-gradient-to-r from-[#7c3aed]/20 to-[#22d3ee]/20">
                             <div className="flex items-center gap-3">
                                 <div className={`w-3 h-3 rounded-full ${isSpeaking ? 'bg-green-400 animate-pulse' : 'bg-[#22d3ee]'}`} />
-                                <span className="font-bold text-white">El Socio</span>
+                                <span className="font-bold text-white">Asistente Virtual</span>
                             </div>
                         </div>
 
-                        {/* WhatsApp Button */}
                         <div className="px-4 pt-3 pb-2">
                             <a
                                 href="https://wa.me/56985917608?text=Hola%20Nelson%2C%20me%20gustaría%20agendar%20una%20reunión"
@@ -579,53 +310,10 @@ const AIChat = ({ onSpeakingChange }) => {
                                 rel="noopener noreferrer"
                                 className="block w-full bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white py-2.5 rounded-xl text-sm font-bold hover:shadow-[0_0_20px_rgba(37,211,102,0.5)] transition-all text-center"
                             >
-                                📱 Ir a WhatsApp para agendar reunión
+                                📱 Continuar en WhatsApp
                             </a>
                         </div>
 
-                        {/* Settings panel */}
-                        {showSettings && (
-                            <div className="p-4 border-b border-white/10 bg-black/30 space-y-4">
-                                <div>
-                                    <label className="text-xs text-gray-400 block mb-2">ApiFreeLLM API Key</label>
-                                    <input
-                                        type="password"
-                                        value={apiKey}
-                                        readOnly
-                                        placeholder="apf_..."
-                                        className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-gray-400 cursor-not-allowed focus:outline-none"
-                                        title="Configurado vía .env"
-                                    />
-                                    <p className="text-[10px] text-gray-500 mt-1">
-                                        API Key configurada en variables de entorno (`VITE_APIFREELLM_API_KEY`).
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <label className="text-xs text-gray-400 block mb-2">Modelo</label>
-                                    <select
-                                        value={selectedModel}
-                                        onChange={(e) => setSelectedModel(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#22d3ee]"
-                                    >
-                                        {MODELS.map(model => (
-                                            <option key={model.id} value={model.id} className="bg-[#0a0a1a]">
-                                                {model.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <button
-                                    onClick={() => saveSettings(apiKey, selectedModel)}
-                                    className="w-full bg-[#7c3aed] text-white py-2 rounded text-sm font-bold hover:bg-[#6d28d9] transition-colors"
-                                >
-                                    Guardar Configuración
-                                </button>
-                            </div>
-                        )}
-
-                        {/* Messages */}
                         <div className="h-64 overflow-y-auto p-4 space-y-3">
                             {messages.map((msg, i) => (
                                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -651,21 +339,18 @@ const AIChat = ({ onSpeakingChange }) => {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Error display */}
                         {error && (
                             <div className="px-4 py-2 bg-red-500/20 text-red-300 text-xs">
                                 {error}
                             </div>
                         )}
 
-                        {/* Transcript preview */}
                         {transcript && (
                             <div className="px-4 py-2 bg-[#7c3aed]/20 text-[#22d3ee] text-sm italic">
                                 "{transcript}"
                             </div>
                         )}
 
-                        {/* Controls */}
                         <div className="p-4 border-t border-white/10 space-y-4">
                             <form onSubmit={handleTextSubmit} className="flex gap-2">
                                 <input

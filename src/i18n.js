@@ -42,7 +42,7 @@ const resources = {
             },
             about: {
                 title: "Sobre Mí",
-                desc: "Ingeniero en Informática con más de 5 años de trayectoria en el desarrollo de soluciones escalables mediante arquitecturas de microservicios y API REST. Experto en el ecosistema JavaScript (NestJS, Angular, Vue 3) y Java (Spring Boot, Spring Batch), cuenta con sólida experiencia técnica en la integración de pasarelas de pago y la modernización de sistemas legacy. Profesional enfocado en la aplicación de principios SOLID, metodologías ágiles (Scrum) e implementación de soluciones con Inteligencia Artificial.",
+                desc: "Ingeniero en Informática con +5 años creando soluciones escalables con microservicios y APIs REST. Especialista en JavaScript (NestJS, Angular, Vue 3) y Java (Spring Boot, Spring Batch), con experiencia en integración de pasarelas de pago, modernización de sistemas legacy y desarrollo de módulos ERP con IA.\n\nMi experiencia en el desarrollo de software comenzó en Bolsa de Comercio de Santiago y Fusiona (2019-2020), empresas en Santiago donde implementé herramientas de automatización con Puppeteer y AngularJS, y migré módulos críticos a Angular 9 con APIs en Hapi sobre MongoDB, ambos proyectos de alcance nacional. Continué en Indra (2022) como System Engineer, implementando APIs con Spring Boot y procesos ETL con Spring Batch para clientes del sector público y privado en Chile. Más recientemente en Junngla SPA (2023-2025), desarrollé middleware financiero para integración RedPay, módulos Odoo 18 con IA y plugins Keycloak SSO, todos proyectos con alcance nacional.\n\nTrabajo remoto y vibe coding son mi forma de hacer las cosas. Cada proyecto lo trato como si fuera mío, cuidando cada detalle y optimizando recursos para que los resultados hablen por sí solos. Y cuando no estoy programando, me encontrarás corriendo, leyendo o cultivando hábitos positivos. Después de todo, un buen desarrollador también se construye desde adentro.",
                 details: {
                     global: {
                         title: "Experiencia Global",
@@ -233,18 +233,18 @@ const resources = {
             },
             signature: {
                 title: "Mi Filosofía",
-                intro: "Trabajo bajo una filosofía que me ha permitido entregar proyectos sólidos, eficientes y con un toque único: <strong>Trabajo Remoto y Vibe Coding</strong>.",
+                intro: "Trabajo bajo una filosofía que me ha permitido entregar proyectos sólidos, eficientes y con un toque único: <strong>Trabajo Remoto y Diseño con IA</strong>.",
                 remote: {
                     title: "🌍 <strong>Trabajo Remoto</strong>",
-                    desc: "No importa dónde estés, puedo desarrollar, optimizar y entregar soluciones sin límites geográficos. Esto me da la flexibilidad de trabajar de forma estratégica, manteniendo un flujo constante y una comunicación ágil para que todo avance sin fricciones."
+                    desc: "Desarrollo y entrego soluciones sin límites geográficos, manteniendo comunicación ágil y flujo constante para que todo avance sin fricciones."
                 },
                 vibe: {
-                    title: "💻 <strong>Vibe Coding</strong>",
-                    desc: "Para mí, programar es más que escribir líneas de código: es un ambiente, una energía. Mi kit incluye Cursor para acelerar el desarrollo con IA, VS Code y suite de Jetbrains para personalizar cada proyecto y sí… una buena taza de café y música lo-fi que me acompañan hasta en las madrugadas de inspiración. El resultado: código limpio, escalable y pensado para durar."
+                    title: "📋 <strong>Spec Driven Developer</strong>",
+                    desc: "El valor no está solo en escribir código, sino en saber qué construir. Por eso defino especificaciones claras antes de escribir una línea, transformando requerimientos precisos en prompts efectivos."
                 },
                 promise: {
                     title: "✨ <strong>Mi promesa</strong>",
-                    desc: "Cada proyecto lo trato como si fuera propio: cuidando los detalles, optimizando recursos y asegurando que el resultado no solo cumpla, sino que impresione. Aquí no hay excusas, solo compromiso y resultados."
+                    desc: "Cada proyecto recibe la misma dedicación: atención a los detalles, buen uso de recursos y resultados sólidos. Simple, sin rodeos."
                 },
                 copyleft: "© Copyleft Nelson Ramos",
                 location: "Talca, VII Región del Maule, Chile"
@@ -290,7 +290,7 @@ const resources = {
             },
             about: {
                 title: "About Me",
-                desc: "Computer Engineer with more than 5 years of experience developing scalable solutions through microservices architectures and REST APIs. Expert in the JavaScript ecosystem (NestJS, Angular, Vue 3) and Java (Spring Boot, Spring Batch), with solid technical experience in payment gateway integration and legacy system modernization. Professional focused on applying SOLID principles, agile methodologies (Scrum), and implementing Artificial Intelligence solutions.",
+                desc: "Computer Engineer with +5 years building scalable solutions with microservices and REST APIs. Specialized in JavaScript (NestJS, Angular, Vue 3) and Java (Spring Boot, Spring Batch), with experience in payment gateway integration, legacy system modernization, and AI-powered ERP module development.\n\nMy software development career started at Bolsa de Comercio de Santiago and Fusiona (2019-2020), Santiago-based companies where I built automation tools with Puppeteer and AngularJS, and migrated critical modules to Angular 9 with Hapi APIs on MongoDB — both nationwide projects. I then joined Indra (2022) as a System Engineer, building Spring Boot APIs and ETL processes with Spring Batch for public and private sector clients across Chile. Most recently at Junngla SPA (2023-2025), I developed financial middleware for RedPay integration, Odoo 18 AI modules, and Keycloak SSO plugins — all national-scale projects.\n\nRemote work and vibe coding are how I roll. Every project I treat like my own — details handled, resources optimized, results that speak for themselves. And when I'm not coding, you'll find me running, reading, or working on good habits. After all, a great developer is built from the inside out.",
                 details: {
                     global: {
                         title: "Global Experience",
@@ -481,18 +481,18 @@ const resources = {
             },
             signature: {
                 title: "My Philosophy",
-                intro: "I work under a philosophy that has allowed me to deliver solid, efficient projects with a unique touch: <strong>Remote Work and Vibe Coding</strong>.",
+                intro: "I work under a philosophy that has allowed me to deliver solid, efficient projects with a unique touch: <strong>Remote Work and AI-Driven Design</strong>.",
                 remote: {
                     title: "🌍 <strong>Remote Work</strong>",
-                    desc: "No matter where you are, I can develop, optimize, and deliver solutions without geographical limits. This gives me the flexibility to work strategically, maintaining a constant flow and agile communication so everything moves forward smoothly."
+                    desc: "I develop and deliver solutions without geographical limits, keeping agile communication and a steady flow so everything moves forward smoothly."
                 },
                 vibe: {
-                    title: "💻 <strong>Vibe Coding</strong>",
-                    desc: "For me, coding is more than writing lines of code: it’s an atmosphere, an energy. My kit includes Cursor to speed up development with AI, VS Code, and the JetBrains suite to customize every project — and yes… a good cup of coffee and lo-fi music that keeps me going through late nights. The result: clean, scalable code built to last."
+                    title: "📋 <strong>Spec Driven Developer</strong>",
+                    desc: "The real value isn't just writing code — it's knowing what to build. So I define clear specifications before writing a single line, turning precise requirements into effective prompts."
                 },
                 promise: {
                     title: "✨ <strong>My Promise</strong>",
-                    desc: "I treat every project as if it were my own: taking care of details, optimizing resources, and ensuring the result not only meets expectations but impresses. No excuses — only commitment and results."
+                    desc: "Every project gets the same care: attention to detail, good use of resources, and solid results. Simple and straightforward."
                 },
                 copyleft: "© Copyleft Nelson Ramos",
                 location: "Talca, VII Maule Region, Chile"

@@ -19,7 +19,7 @@ export default function CombinedSkills() {
             title: t('skills.languages.title'),
             items: t('skills.languages.items', { returnObjects: true }),
             Icon: Code2,
-            color: '#bef264'
+            color: '#eab308'
         },
         {
             key: 'frameworks',
@@ -72,30 +72,27 @@ export default function CombinedSkills() {
                 {modalSections.map((section) => (
                     <div
                         key={section.key}
-                        className="rounded-2xl border border-white/10 bg-[var(--bg-card)] p-4"
+                        className="rounded-xl p-4"
+                        style={{ backgroundColor: hexToRgba(section.color, 0.04) }}
                     >
-                        <div className="flex items-center gap-3 mb-3">
+                        <div className="flex items-center gap-2.5 mb-4">
                             <div
-                                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                                 style={{ backgroundColor: hexToRgba(section.color, 0.14) }}
                             >
                                 <section.Icon size={18} style={{ color: section.color }} />
                             </div>
-                            <div>
-                                <h5 className="text-sm font-bold text-[var(--primary)] leading-tight">{section.title}</h5>
-                                <p className="text-xs text-[var(--text-subtle)]">{section.items.length} items</p>
-                            </div>
+                            <h5 className="text-sm font-bold text-[var(--primary)]">{section.title}</h5>
                         </div>
 
                         <div className="flex flex-wrap gap-2">
                             {section.items.map((item, idx) => (
                                 <span
                                     key={idx}
-                                    className="px-3 py-1.5 rounded-full text-xs border"
+                                    className="px-3 py-1.5 rounded-lg text-sm font-medium"
                                     style={{
                                         backgroundColor: hexToRgba(section.color, 0.10),
-                                        borderColor: hexToRgba(section.color, 0.22),
-                                        color: 'var(--primary)'
+                                        color: 'var(--primary)',
                                     }}
                                 >
                                     {item}
