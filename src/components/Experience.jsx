@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import curriculumPdf from '../assets/CV_NelsonRamos.pdf';
+import curriculumPdfEs from '../assets/CV Nelson Ramos.pdf';
+import curriculumPdfEn from '../assets/CV Nelson Ramos - English.pdf';
 
 const experienceKeys = [
     { key: "entelgy", company: "Entelgy", color: "bg-cyan-500" },
@@ -14,7 +15,8 @@ const experienceKeys = [
 ];
 
 export default function Experience() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const curriculumPdf = i18n.language === 'en' ? curriculumPdfEn : curriculumPdfEs;
 
     return (
         <section className="sport-card !bg-[var(--bg-card)] border border-white/5 p-6 mt-8">
