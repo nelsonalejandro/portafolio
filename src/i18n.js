@@ -120,6 +120,11 @@ const resources = {
                 viewAll: "Ver Todo",
                 downloadCv: "Descargar CV",
                 roles: {
+                    sonda: {
+                        role: "Desarrollador fullstack",
+                        period: "Agosto 2026 - Actualidad",
+                        desc: "Líder técnico backend responsable de la arquitectura y desarrollo de motor de conciliación de movimientos de pago, construido en Python mediante el framework FastAPI, proyecto BUPA garantizando alto rendimiento."
+                    },
                     entelgy: {
                         role: "Desarrollador Full-Stack",
                         period: "Nov 2025 – Dic 2025",
@@ -368,6 +373,11 @@ const resources = {
                 viewAll: "View All",
                 downloadCv: "Download CV",
                 roles: {
+                    sonda: {
+                        role: "Fullstack Developer",
+                        period: "August 2026 - Present",
+                        desc: "Backend Technical Lead responsible for the architecture and development of a payment movement reconciliation engine, built in Python using the FastAPI framework, BUPA project guaranteeing high performance."
+                    },
                     entelgy: {
                         role: "Full-Stack Developer",
                         period: "Nov 2025 – Dec 2025",

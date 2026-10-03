@@ -5,6 +5,7 @@ import curriculumPdfEs from '../assets/CV Nelson Ramos.pdf';
 import curriculumPdfEn from '../assets/CV Nelson Ramos - English.pdf';
 
 const experienceKeys = [
+    { key: "sonda", company: "SONDA", color: "bg-indigo-500" },
     { key: "entelgy", company: "Entelgy", color: "bg-cyan-500" },
     { key: "junngla", company: "Junngla SPA", color: "bg-green-500" },
     { key: "indra", company: "Indra", color: "bg-blue-500" },
