@@ -1,18 +1,17 @@
-const GROQ_API_BASE = 'https://api.groq.com/openai/v1';
-const DEFAULT_MODEL = 'llama-3.3-70b-versatile';
+const OPENROUTER_API_BASE = 'https://openrouter.ai/api/v1';
+const DEFAULT_MODEL = 'poolside/laguna-s-2.1:free';
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const MODELS = [
-  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B' },
-  { id: 'gemma2-9b-it', name: 'Gemma 2 9B' },
-  { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B' },
+  { id: 'poolside/laguna-s-2.1:free', name: 'Laguna S 2.1 (Free)' },
+  { id: 'meta-llama/llama-3.1-8b-instruct:free', name: 'Llama 3.1 8B (Free)' }
 ];
 
-export class GroqService {
+export class OpenRouterService {
   constructor(apiKey) {
     if (!apiKey) {
-      throw new Error('GROQ_API_KEY no configurada. Define VITE_GROQ_API_KEY en .env');
+      throw new Error('OPENROUTER_API_KEY no configurada. Define VITE_OPENROUTER_API_KEY en .env');
     }
     this.apiKey = apiKey;
   }
@@ -27,11 +26,13 @@ export class GroqService {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const response = await fetch(`${GROQ_API_BASE}/chat/completions`, {
+        const response = await fetch(`${OPENROUTER_API_BASE}/chat/completions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.apiKey}`,
+            'HTTP-Referer': 'http://localhost:5173', 
+            'X-Title': 'Nelson Ramos Portfolio', 
           },
           body: JSON.stringify(body),
         });
@@ -44,7 +45,7 @@ export class GroqService {
               await sleep(Math.min(1000 * Math.pow(2, attempt), 10000));
               continue;
             }
-            throw new GroqRateLimitError('Límite de solicitudes alcanzado en Groq.');
+            throw new OpenRouterRateLimitError('Límite de solicitudes alcanzado en OpenRouter.');
           }
 
           if (response.status >= 500 && attempt < maxRetries) {
@@ -52,18 +53,18 @@ export class GroqService {
             continue;
           }
 
-          throw new GroqApiError(`Groq API error (${response.status}): ${text}`);
+          throw new OpenRouterApiError(`OpenRouter API error (${response.status}): ${text}`);
         }
 
         const data = await response.json();
         return data.choices?.[0]?.message?.content?.trim() || '';
 
       } catch (err) {
-        if (err instanceof GroqRateLimitError || err instanceof GroqApiError) {
+        if (err instanceof OpenRouterRateLimitError || err instanceof OpenRouterApiError) {
           throw err;
         }
         if (attempt === maxRetries) {
-          throw new GroqApiError(`Error de conexión con Groq: ${err.message}`);
+          throw new OpenRouterApiError(`Error de conexión con OpenRouter: ${err.message}`);
         }
         await sleep(1000 * attempt);
       }
@@ -71,16 +72,16 @@ export class GroqService {
   }
 }
 
-export class GroqApiError extends Error {
+export class OpenRouterApiError extends Error {
   constructor(message) {
     super(message);
-    this.name = 'GroqApiError';
+    this.name = 'OpenRouterApiError';
   }
 }
 
-export class GroqRateLimitError extends Error {
+export class OpenRouterRateLimitError extends Error {
   constructor(message) {
     super(message);
-    this.name = 'GroqRateLimitError';
+    this.name = 'OpenRouterRateLimitError';
   }
 }

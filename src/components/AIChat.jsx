@@ -1,25 +1,16 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, MicOff, X, MessageCircle, Send } from 'lucide-react';
-import { GroqService, GroqApiError, GroqRateLimitError, MODELS } from '../services/groq';
+import { OpenRouterService, OpenRouterApiError, OpenRouterRateLimitError, MODELS } from '../services/openrouter';
 
-const SYSTEM_PROMPT = `Eres un asistente virtual profesional especializado en soporte, análisis, automatización y resolución de problemas.
+const SYSTEM_PROMPT = `Eres el asistente virtual personal del portafolio de Nelson Ramos.
 
-Tu objetivo es proporcionar respuestas precisas, claras y útiles.
+REGLA ESTRICTA E INQUEBRANTABLE: 
+Tu ÚNICO propósito es responder preguntas exclusivamente relacionadas con el currículum, experiencia profesional, habilidades, proyectos y contacto de Nelson Ramos. 
 
-Debes:
-* Analizar cuidadosamente cada solicitud.
-* Entregar respuestas estructuradas.
-* Ser conciso cuando la pregunta sea simple.
-* Ser detallado cuando la complejidad lo requiera.
-* Solicitar información adicional si es necesaria para responder correctamente.
-* Evitar especulaciones.
-* Basar tus respuestas únicamente en la información disponible.
-* Priorizar la calidad técnica y la utilidad práctica.
+Si el usuario hace CUALQUIER pregunta que NO esté directamente relacionada con la experiencia profesional, perfil, o servicios de Nelson Ramos (ej. resolver problemas de código, responder preguntas generales, matemáticas, redacción, etc.), DEBES negarte amablemente a responder y redirigir la conversación hacia el perfil de Nelson.
 
-Nunca inventes información ni afirmes hechos que no puedas justificar.
-
-Mantén siempre un tono profesional, respetuoso y orientado a la resolución de problemas.
+Ejemplo de respuesta ante desvíos: "Lo siento, soy un asistente diseñado exclusivamente para hablar sobre el perfil profesional y currículum de Nelson Ramos. ¿Te gustaría saber más sobre su experiencia, habilidades tecnológicas o cómo contactarlo?"
 
 INFORMACIÓN DE NELSON RAMOS:
 - Ingeniero en Informática y Desarrollador Full-Stack con +5 años de experiencia.
@@ -38,10 +29,10 @@ const AIChat = ({ onSpeakingChange }) => {
     const transcriptRef = useRef('');
     const messagesEndRef = useRef(null);
 
-    const apiKey = import.meta.env.VITE_GROQ_API_KEY || '';
-    const [groqService] = useState(() => {
+    const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || '';
+    const [openRouterService] = useState(() => {
         try {
-            return new GroqService(apiKey);
+            return new OpenRouterService(apiKey);
         } catch {
             return null;
         }
@@ -53,7 +44,7 @@ const AIChat = ({ onSpeakingChange }) => {
     const [isProcessing, setIsProcessing] = useState(false);
 
     const [selectedModel, setSelectedModel] = useState(() => {
-        const saved = localStorage.getItem('groq_model');
+        const saved = localStorage.getItem('openrouter_model');
         const validModels = MODELS.map(m => m.id);
         return saved && validModels.includes(saved) ? saved : MODELS[0].id;
     });
@@ -140,8 +131,8 @@ const AIChat = ({ onSpeakingChange }) => {
     };
 
     const sendMessage = useCallback(async (userMessage) => {
-        if (!groqService) {
-            setError('API Key de Groq no configurada. Define VITE_GROQ_API_KEY en .env');
+        if (!openRouterService) {
+            setError('API Key de OpenRouter no configurada. Define VITE_OPENROUTER_API_KEY en .env');
             return;
         }
 
@@ -152,20 +143,20 @@ const AIChat = ({ onSpeakingChange }) => {
         setError('');
 
         try {
-            const groqMessages = buildMessages(messagesForPrompt);
-            const response = await groqService.chat(groqMessages, { model: selectedModel });
+            const openRouterMessages = buildMessages(messagesForPrompt);
+            const response = await openRouterService.chat(openRouterMessages, { model: selectedModel });
 
             setMessages(prev => [...prev, { role: 'assistant', content: response }]);
             speak(response);
 
         } catch (err) {
-            console.error('[Groq] Error:', err);
+            console.error('[OpenRouter] Error:', err);
 
-            if (err instanceof GroqRateLimitError) {
+            if (err instanceof OpenRouterRateLimitError) {
                 const msg = 'Se ha alcanzado el límite de solicitudes. Por favor, intente nuevamente en unos momentos.';
                 setMessages(prev => [...prev, { role: 'assistant', content: msg, meta: true }]);
                 speak(msg);
-            } else if (err instanceof GroqApiError) {
+            } else if (err instanceof OpenRouterApiError) {
                 const msg = `Error en el servicio: ${err.message}`;
                 setError(msg);
             } else {
@@ -174,7 +165,7 @@ const AIChat = ({ onSpeakingChange }) => {
         } finally {
             setIsProcessing(false);
         }
-    }, [groqService, messages, selectedModel, speak]);
+    }, [openRouterService, messages, selectedModel, speak]);
 
     const startListening = useCallback(async () => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
