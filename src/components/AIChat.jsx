@@ -72,7 +72,7 @@ const AIChat = ({ onSpeakingChange }) => {
     const initVoice = useCallback(() => {
         const voices = window.speechSynthesis.getVoices();
         const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
-        const name = (n) => n.toLowerCase();
+        const name = (n) => (n || '').toLowerCase();
         preferredVoiceRef.current = spanishVoices.find(v => name(v.name).includes('jorge')) ||
             spanishVoices.find(v => name(v.name).includes('male')) ||
             spanishVoices.find(v => name(v.name).includes('hombre')) ||
