@@ -10,6 +10,7 @@ import Education from './components/Education';
 import MapCard from './components/MapCard';
 import AutocreativaCard from './components/AutocreativaCard';
 import BookCard from './components/BookCard';
+import SalaryTrackerCard from './components/SalaryTrackerCard';
 
 import Contact from './components/Contact';
 import Signature from './components/Signature';
@@ -77,6 +78,7 @@ function App() {
               <Certifications />
               <AutocreativaCard />
               <BookCard />
+              <SalaryTrackerCard />
               <Contact />
             </div>
           </div>

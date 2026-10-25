@@ -218,6 +218,15 @@ const resources = {
                 feature3: "Optimización de costos API",
                 cta: "Ver Libro"
             },
+            salaryTracker: {
+                title: "SalaryTracker",
+                description: "Mantén tu sueldo en mente y mira cómo crece tu dinero segundo a segundo. Calcula tus ganancias en tiempo real desde un widget minimalista, sin suscripciones ni servidores.",
+                badge: "app - MacOS",
+                feature1: "Contador de ganancias en tiempo real en tu barra de menú",
+                feature2: "100% privado y offline: sin analíticas, cookies ni telemetría",
+                feature3: "Soporte multilenguaje, configuración de día de pago y monedas",
+                cta: "Saber más"
+            },
             cvGenerator: {
                 title: "CV MAGIC",
                 description: "Herramienta de creacion de curriculum vitae, es una plataforma para armar tu currículum de manera gratuita, la cual te permite capturar información desde fotos usando la cámara de tu equipo, además de importar y exportar datos desde PDFs e imágenes. Gratis y sin cuenta.",
@@ -470,6 +479,15 @@ const resources = {
                 feature2: "Autonomous Agents",
                 feature3: "API Cost Optimization",
                 cta: "View Book"
+            },
+            salaryTracker: {
+                title: "SalaryTracker",
+                description: "I invite you to try my new macOS app: keep your salary in mind and watch your money grow second by second. It calculates your earnings in real time from your menu bar — no subscriptions, no servers — with a minimalist design inspired by retro Casio precision.",
+                badge: "app - MacOS",
+                feature1: "Real-time earnings counter in your menu bar",
+                feature2: "100% private and offline: no analytics, cookies or telemetry",
+                feature3: "Native Swift app, super lightweight on battery",
+                cta: "Meet the App"
             },
             cvGenerator: {
                 title: "CV MAGIC",
