@@ -1,11 +1,11 @@
 const OPENROUTER_API_BASE = 'https://openrouter.ai/api/v1';
-const DEFAULT_MODEL = 'poolside/laguna-s-2.1:free';
+// OpenRouter's router picks an available free model on each request, so retired models never break the chat.
+const DEFAULT_MODEL = 'openrouter/free';
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const MODELS = [
-  { id: 'poolside/laguna-s-2.1:free', name: 'Laguna S 2.1 (Free)' },
-  { id: 'meta-llama/llama-3.1-8b-instruct:free', name: 'Llama 3.1 8B (Free)' }
+  { id: 'openrouter/free', name: 'Free Models Router (auto)' }
 ];
 
 export class OpenRouterService {
